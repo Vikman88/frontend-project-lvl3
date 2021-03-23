@@ -1,0 +1,29 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "RSS aggregator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vikman88/frontend-project-lvl3.git"
+  },
+  "keywords": [
+    "js",
+    "webpack",
+    "html",
+    "bootstrap"
+  ],
+  "author": "Vilkov V <vikman88@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vikman88/frontend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/Vikman88/frontend-project-lvl3#readme",
+  "devDependencies": {
+    "webpack": "^5.27.2",
+    "webpack-cli": "^4.5.0"
+  }
+}
