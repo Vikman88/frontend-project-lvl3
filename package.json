@@ -23,7 +23,11 @@
   },
   "homepage": "https://github.com/Vikman88/frontend-project-lvl3#readme",
   "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.12",
     "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.3",
+    "babel-loader": "^8.2.2",
     "eslint": "^7.22.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-babel": "^5.3.1",
@@ -33,6 +37,7 @@
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
     "webpack": "^5.27.2",
-    "webpack-cli": "^4.5.0"
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
   }
 }
