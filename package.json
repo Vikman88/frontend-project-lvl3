@@ -4,9 +4,9 @@
   "description": "RSS aggregator",
   "main": "index.html",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack --mode development",
-    "build": "cross-env NODE_ENV=production webpack --mode production",
-    "start": "cross-env NODE_ENV=development webpack serve --mode development"
+    "dev": "NODE_ENV=development webpack --mode development",
+    "build": "NODE_ENV=production webpack --mode production",
+    "start": "NODE_ENV=development webpack serve --mode development"
   },
   "repository": {
     "type": "git",
