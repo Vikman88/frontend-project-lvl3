@@ -24,7 +24,8 @@ const validate = (value, listValues) => {
 };
 
 const getResult = async (value) => {
-  const response = axios; // дописать
+  const response = await axios.get(value); // дописать
+  console.log(response);
 };
 
 export default () => {
@@ -64,7 +65,7 @@ export default () => {
     try {
       watchedState.form.status = 'sending';
       watchedState.error = null;
-      const result = await getResult({ name: value }); //поменять название
+      const result = await getResult(value); //поменять название
     } catch (error) {
       watchedState.form.status = 'failed';
       watchedState.form.values.pop();
