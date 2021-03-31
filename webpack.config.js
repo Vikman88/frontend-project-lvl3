@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
@@ -22,6 +23,7 @@ module.exports = {
     port: 4200,
     hot: isDev,
   },
+  devtool: isDev ? 'source-map' : '',
   plugins: [
     new HtmlWebpackPlugin({
       template: 'template.html',
@@ -29,6 +31,10 @@ module.exports = {
       minify: {
         collapseWhitespace: isProd,
       },
+    }),
+    new ESLintPlugin({
+      failOnError: false,
+      failOnWarning: false,
     }),
     new CleanWebpackPlugin(),
   ],
@@ -40,11 +46,6 @@ module.exports = {
         use: {
           loader: 'babel-loader',
         },
-      },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader',
       },
     ],
   },
