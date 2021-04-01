@@ -33,8 +33,8 @@ module.exports = {
       },
     }),
     new ESLintPlugin({
-      failOnError: false,
-      failOnWarning: false,
+      failOnError: !isDev,
+      failOnWarning: !isDev,
     }),
     new CleanWebpackPlugin(),
   ],

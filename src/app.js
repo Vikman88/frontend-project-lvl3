@@ -2,10 +2,17 @@ const yup = require('yup');
 const axios = require('axios');
 import render from './second.js';
 
+const variables = {
+  proxy: () => 'https://hexlet-allorigins.herokuapp.com/raw?url=',
+  goodStatus: () => 200,
+};
 const messages = {
   empty: () => 'Поле не заполнено',
   invalid: () => 'Ссылка должна быть валидным URL',
   dublicate: () => 'RSS уже существует',
+  invalidRssUrl: () => 'Ресурс не содержит валидный RSS',
+  networkError: () => 'Ошибка сети',
+  success: () => 'RSS успешно загружен',
 };
 
 const validate = (url, listUrls) => {
@@ -41,12 +48,12 @@ const parsData = (data) => {
   return result;
 };
 
-const getResult = (url, state) => {
-  axios
-    .get(url)
-    .then((response) => parsData(response.request.responseXML))
-    .then((feeds) => state.posts.push(feeds))
-    .catch((error) => console.log(error)); // допилить в случае ошибки
+const getRequest = (url) => {
+  const promise = axios
+    .get(`${variables.proxy()}${encodeURIComponent(url)}`)
+    .then((response) => response)
+    .catch((error) => error);
+  return promise;
 };
 
 export default () => {
@@ -55,6 +62,8 @@ export default () => {
     form: document.querySelector('form'),
     feedbackForm: document.querySelector('.feedback'),
     button: document.querySelector('[type="submit"]'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
   };
 
   const state = {
@@ -67,7 +76,7 @@ export default () => {
       },
     },
     posts: [],
-    error: null,
+    messageAlert: null,
   };
 
   const watchedState = render(state, elements);
@@ -90,16 +99,28 @@ export default () => {
       error,
       valid: true,
     };
+    watchedState.messageAlert = null;
     watchedState.form.urls.push(url);
-    try {
-      watchedState.form.status = 'sending';
-      watchedState.error = null;
-      const result = getResult(url, watchedState); //поменять название
-      console.log(111112);
-    } catch (error) {
-      watchedState.form.status = 'failed';
-      watchedState.form.urls.pop();
-      watchedState = error.message; //организовать обработку ошибок
-    }
+    watchedState.form.status = 'sending';
+    getRequest(url).then((response) => {
+      console.log(response.message, response.status, response);
+      const { responseXML } = response.request;
+      const status = response.status;
+      console.log(status);
+      if (!responseXML) {
+        watchedState.messageAlert =
+          status === variables.goodStatus()
+            ? messages.invalidRssUrl()
+            : messages.networkError();
+        watchedState.form.status = 'failed';
+        watchedState.form.urls.pop();
+        return;
+      }
+      const parsedPosts = parsData(responseXML);
+      watchedState.posts.push(parsedPosts);
+      watchedState.messageAlert = messages.success();
+      watchedState.form.status = 'rendering';
+    });
+    watchedState.form.status = 'filling'; //??
   });
 };
