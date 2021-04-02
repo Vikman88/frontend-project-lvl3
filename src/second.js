@@ -2,25 +2,55 @@ const onChange = require('on-change');
 
 const createEl = (el) => document.createElement(`${el}`);
 
-const renderPosts = (posts, el) => {
+const reducePosts = (acc, item) => {
+  const liItems = createEl('li');
+  const button = createEl('button');
+  button.type = 'button';
+  button.classList.add('btn', 'btn-primary', 'btn-sm');
+  button.setAttribute('data-toggle', 'modal');
+  button.setAttribute('data-target', '#modal');
+  button.textContent = 'Просмотр';
+  liItems.classList.add(
+    'list-group-item',
+    'd-flex',
+    'justify-content-between',
+    'align-items-start'
+  );
+  const a = createEl('a');
+  a.href = item.link.textContent;
+  a.classList.add('font-weight-bold');
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.textContent = item.title.textContent;
+  liItems.append(a, button);
+  return [...acc, liItems];
+};
+
+const renderContent = (posts, el) => {
   el.feeds.innerHTML = '';
-  const h2 = createEl('h2');
-  h2.textContent = 'Фиды';
-  const ul = createEl('ul');
-  ul.classList.add('list-group', 'mb-5');
-  el.feeds.append(h2, ul);
-  const feeds = posts.map((item) => {
+  el.posts.innerHTML = '';
+  const h2Feeds = createEl('h2');
+  const h2Posts = createEl('h2');
+  h2Feeds.textContent = 'Фиды';
+  h2Posts.textContent = 'Посты';
+  const ulFeeds = createEl('ul');
+  const ulPosts = createEl('ul');
+  ulFeeds.classList.add('list-group', 'mb-5');
+  ulPosts.classList.add('list-group');
+  el.feeds.append(h2Feeds, ulFeeds);
+  el.posts.append(h2Posts, ulPosts);
+  posts.forEach((post) => {
     const li = createEl('li');
     li.classList.add('list-group-item');
     const h3 = createEl('h3');
-    h3.textContent = item.title.textContent;
+    h3.textContent = post.title.textContent;
     const p = createEl('p');
-    p.textContent = item.description.textContent;
+    p.textContent = post.description.textContent;
     li.append(h3, p);
-    return li.outerHTML;
+    ulFeeds.prepend(li);
+    const posts = post.items.reduce(reducePosts, []);
+    ulPosts.prepend(...posts);
   });
-  console.log(feeds.join(''));
-  ul.innerHTML = feeds.join('');
 };
 
 const renderMessageForm = (state, el) => {
@@ -45,6 +75,8 @@ const statusSwitch = (state, el) => {
     case 'filling':
       el.input.removeAttribute('readonly');
       el.button.removeAttribute('disabled');
+      el.input.focus();
+      el.input.value = '';
       break;
     case 'failed':
       el.input.removeAttribute('readonly');
@@ -71,7 +103,7 @@ export default (state, elements) => {
         statusSwitch(watchedState, elements);
         break;
       case 'posts':
-        renderPosts(state.posts, elements);
+        renderContent(state.posts, elements);
         break;
       default:
         break; // прописать дефолт или поменять свитч
