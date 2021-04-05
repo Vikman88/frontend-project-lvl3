@@ -30,6 +30,14 @@ const validate = (url, listUrls) => {
   }
 };
 
+const updateCollection = (collection, id) => {
+  collection.forEach((feed) =>
+    feed.items.forEach((post) => {
+      if (post.id === parseInt(id)) post.touched = true;
+    })
+  );
+};
+
 const getChildElements = (el) => {
   const title = el.querySelector('title');
   const link = el.querySelector('link');
@@ -38,13 +46,15 @@ const getChildElements = (el) => {
   return result;
 };
 
-const parsData = (data) => {
-  const items = data.querySelectorAll('item');
-  const itemsElToArr = Array.from(items).reduce(
-    (acc, item) => [...acc, getChildElements(item)],
-    []
-  );
-  const result = { ...getChildElements(data), items: itemsElToArr };
+const parsData = (data, state) => {
+  const itemsCollection = data.querySelectorAll('item');
+  const items = Array.from(itemsCollection).reduce((acc, item) => {
+    const childElements = getChildElements(item);
+    childElements.id = ++state.idPost;
+    childElements.touched = false;
+    return [...acc, childElements];
+  }, []);
+  const result = { ...getChildElements(data), items };
   return result;
 };
 
@@ -62,8 +72,11 @@ export default () => {
     form: document.querySelector('form'),
     feedbackForm: document.querySelector('.feedback'),
     button: document.querySelector('[type="submit"]'),
-    feeds: document.querySelector('.feeds'),
-    posts: document.querySelector('.posts'),
+    feedsField: document.querySelector('.feeds'),
+    postsField: document.querySelector('.posts'),
+    modalHead: document.querySelector('.modal-header'),
+    modalBody: document.querySelector('.modal-body'),
+    modalFooter: document.querySelector('.modal-footer'),
   };
 
   const state = {
@@ -76,7 +89,8 @@ export default () => {
       },
     },
     posts: [],
-    messageAlert: null,
+    networkAlert: null,
+    idPost: 0,
   };
 
   const watchedState = render(state, elements);
@@ -99,7 +113,7 @@ export default () => {
       error,
       valid: true,
     };
-    watchedState.messageAlert = null;
+    watchedState.networkAlert = null;
     watchedState.form.urls.push(url);
     watchedState.form.status = 'sending';
     getRequest(url).then((response) => {
@@ -108,7 +122,7 @@ export default () => {
       const status = response.status;
       console.log(status);
       if (!responseXML) {
-        watchedState.messageAlert =
+        watchedState.networkAlert =
           status === variables.goodStatus()
             ? messages.invalidRssUrl()
             : messages.networkError();
@@ -116,10 +130,32 @@ export default () => {
         watchedState.form.urls.pop();
         return;
       }
-      const parsedPosts = parsData(responseXML);
+
+      const parsedPosts = parsData(responseXML, watchedState);
       watchedState.posts.push(parsedPosts);
-      watchedState.messageAlert = messages.success();
+      watchedState.networkAlert = messages.success();
       watchedState.form.status = 'rendering';
+      const postItemsCollection = document.querySelectorAll('.list-group');
+      console.log(postItemsCollection);
+      elements.postsField.addEventListener('click', (e) => {
+        const { target } = e;
+        const { id } = target.dataset;
+        updateCollection(watchedState.posts, id);
+        console.log(state);
+      });
+      /*       postItemsCollection.forEach((postItem) => {
+        const link = postItem.querySelector('a');
+        const button = postItem.querySelector('button');
+        console.log(link);
+
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const { target } = e;
+          const { id } = target.dataset;
+          changeCollection(watchedState.posts, id);
+          console.log(state);
+        });
+      }); */
     });
     watchedState.form.status = 'filling'; //??
   });
