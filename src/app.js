@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import i18n from 'i18next';
 import render from './second.js';
-import resources from './assets';
+import resources from './locales';
 
 const variables = {
   proxy: () => 'https://hexlet-allorigins.herokuapp.com/raw?url=',
@@ -94,6 +94,7 @@ const getRequest = (url) => {
 };
 
 const app = () => {
+  //export default
   i18n
     .init({
       lng: 'ru',
