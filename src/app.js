@@ -1,33 +1,60 @@
-const yup = require('yup');
-const axios = require('axios');
+import * as yup from 'yup';
+import axios from 'axios';
+import i18n from 'i18next';
 import render from './second.js';
+import resources from './assets';
 
 const variables = {
   proxy: () => 'https://hexlet-allorigins.herokuapp.com/raw?url=',
   goodStatus: () => 200,
 };
-const messages = {
-  empty: () => 'Поле не заполнено',
-  invalid: () => 'Ссылка должна быть валидным URL',
-  dublicate: () => 'RSS уже существует',
-  invalidRssUrl: () => 'Ресурс не содержит валидный RSS',
-  networkError: () => 'Ошибка сети',
-  success: () => 'RSS успешно загружен',
+const alertPaths = {
+  empty: () => 'form.messageAlert.empty',
+  invalid: () => 'form.messageAlert.invalid',
+  dublicate: () => 'form.messageAlert.dublicate',
+  invalidRssUrl: () => 'networkAlert.invalidRssUrl',
+  networkError: () => 'networkAlert.networkError',
+  success: () => 'networkAlert.success',
 };
 
+const hashCode = (
+  s // переписать функцию
+) =>
+  s.split('').reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
 const validate = (url, listUrls) => {
-  const shema = yup
-    .string()
-    .trim()
-    .required(messages.empty())
-    .url(messages.invalid())
-    .notOneOf(listUrls, messages.dublicate());
+  const shema = yup.string().trim().required().url().notOneOf(listUrls);
   try {
     shema.validateSync(url);
     return null;
   } catch (error) {
     return error.message;
   }
+};
+
+const compaireData = (targetData, compairedData, state) => {
+  const addedTitles = compairedData.map(({ title }) => title);
+  if (addedTitles.includes(targetData.title)) {
+    const findedIndexField = addedTitles.indexOf(targetData.title);
+    console.log(findedIndexField);
+    const findedField = compairedData[findedIndexField];
+    console.log(findedField);
+    const findedItems = findedField.items;
+    console.log(findedItems);
+    const findedIds = findedItems.map(({ id }) => id);
+    console.log(findedIds);
+    const targetItems = targetData.items;
+    console.log(targetItems);
+    const updatedItems = targetItems.reduce((acc, v) => {
+      const currentId = v.id;
+      if (!findedIds.includes(currentId)) acc.push(v);
+      return acc;
+    }, []);
+    state[findedIndexField].items.unshift(...updatedItems);
+  } else state.push(targetData);
 };
 
 const updateCollection = (collection, id) => {
@@ -39,18 +66,18 @@ const updateCollection = (collection, id) => {
 };
 
 const getChildElements = (el) => {
-  const title = el.querySelector('title');
-  const link = el.querySelector('link');
-  const description = el.querySelector('description');
+  const title = el.querySelector('title').textContent;
+  const link = el.querySelector('link').textContent;
+  const description = el.querySelector('description').textContent;
   const result = { title, link, description };
   return result;
 };
 
-const parsData = (data, state) => {
+const parsData = (data) => {
   const itemsCollection = data.querySelectorAll('item');
   const items = Array.from(itemsCollection).reduce((acc, item) => {
     const childElements = getChildElements(item);
-    childElements.id = ++state.idPost;
+    childElements.id = hashCode(childElements.title);
     childElements.touched = false;
     return [...acc, childElements];
   }, []);
@@ -66,84 +93,96 @@ const getRequest = (url) => {
   return promise;
 };
 
-export default () => {
-  const elements = {
-    input: document.querySelector('input'),
-    form: document.querySelector('form'),
-    feedbackForm: document.querySelector('.feedback'),
-    button: document.querySelector('[type="submit"]'),
-    feedsField: document.querySelector('.feeds'),
-    postsField: document.querySelector('.posts'),
-    modalHead: document.querySelector('.modal-header'),
-    modalBody: document.querySelector('.modal-body'),
-    modalFooter: document.querySelector('.modal-footer'),
-  };
-
-  const state = {
-    form: {
-      status: 'filling',
-      urls: [],
-      field: {
-        error: null,
-        valid: true,
-      },
-    },
-    posts: [],
-    networkAlert: null,
-    idPost: 0,
-  };
-
-  const watchedState = render(state, elements);
-
-  const form = elements.form;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const listUrls = state.form.urls;
-    const formData = new FormData(e.target);
-    const url = formData.get('url');
-    const error = validate(url, listUrls);
-    if (error) {
-      watchedState.form.field = {
-        error,
-        valid: false,
-      };
-      return;
-    }
-    watchedState.form.field = {
-      error,
-      valid: true,
-    };
-    watchedState.networkAlert = null;
-    watchedState.form.urls.push(url);
-    watchedState.form.status = 'sending';
-    getRequest(url).then((response) => {
-      console.log(response.message, response.status, response);
-      const { responseXML } = response.request;
-      const status = response.status;
-      console.log(status);
-      if (!responseXML) {
-        watchedState.networkAlert =
-          status === variables.goodStatus()
-            ? messages.invalidRssUrl()
-            : messages.networkError();
-        watchedState.form.status = 'failed';
-        watchedState.form.urls.pop();
-        return;
-      }
-
-      const parsedPosts = parsData(responseXML, watchedState);
-      watchedState.posts.push(parsedPosts);
-      watchedState.networkAlert = messages.success();
-      watchedState.form.status = 'rendering';
-      const postItemsCollection = document.querySelectorAll('.list-group');
-      console.log(postItemsCollection);
-      elements.postsField.addEventListener('click', (e) => {
-        const { target } = e;
-        const { id } = target.dataset;
-        updateCollection(watchedState.posts, id);
-        console.log(state);
+const app = () => {
+  i18n
+    .init({
+      lng: 'ru',
+      debug: false,
+      resources,
+    })
+    .then((t) => {
+      yup.setLocale({
+        mixed: {
+          required: i18n.t(alertPaths.empty()),
+          notOneOf: i18n.t(alertPaths.dublicate()),
+        },
+        string: {
+          url: i18n.t(alertPaths.invalid()),
+        },
       });
-      /*       postItemsCollection.forEach((postItem) => {
+
+      const elements = {
+        input: document.querySelector('input'),
+        form: document.querySelector('form'),
+        feedbackForm: document.querySelector('.feedback'),
+        button: document.querySelector('[type="submit"]'),
+        feedsField: document.querySelector('.feeds'),
+        postsField: document.querySelector('.posts'),
+        modalHead: document.querySelector('.modal-header'),
+        modalBody: document.querySelector('.modal-body'),
+        modalFooter: document.querySelector('.modal-footer'),
+      };
+
+      const state = {
+        form: {
+          status: 'filling',
+          urls: [],
+          field: {
+            error: null,
+            valid: true,
+          },
+        },
+        posts: [],
+        networkAlert: null,
+        idPost: 0,
+      };
+
+      const watchedState = render(state, elements);
+
+      const form = elements.form;
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const listUrls = state.form.urls;
+        const formData = new FormData(e.target);
+        const url = formData.get('url');
+        const error = validate(url, listUrls);
+        if (error) {
+          watchedState.form.field = {
+            error,
+            valid: false,
+          };
+          return;
+        }
+        watchedState.form.field = {
+          error,
+          valid: true,
+        };
+        watchedState.networkAlert = null;
+        watchedState.form.urls.push(url);
+        watchedState.form.status = 'sending';
+        getRequest(url).then((response) => {
+          const { responseXML } = response.request;
+          const status = response.status;
+          if (!responseXML) {
+            watchedState.networkAlert =
+              status === variables.goodStatus()
+                ? i18n.t(alertPaths.invalidRssUrl())
+                : i18n.t(alertPaths.networkError());
+            watchedState.form.status = 'failed';
+            watchedState.form.urls.pop();
+            return;
+          }
+
+          const parsedPosts = parsData(responseXML);
+          compaireData(parsedPosts, state.posts, watchedState.posts);
+          watchedState.networkAlert = i18n.t(alertPaths.success());
+          watchedState.form.status = 'rendering';
+          elements.postsField.addEventListener('click', (e) => {
+            const { target } = e;
+            const { id } = target.dataset;
+            updateCollection(watchedState.posts, id);
+          });
+          /*       postItemsCollection.forEach((postItem) => {
         const link = postItem.querySelector('a');
         const button = postItem.querySelector('button');
         console.log(link);
@@ -156,7 +195,27 @@ export default () => {
           console.log(state);
         });
       }); */
+        });
+        const rerender = (urls) =>
+          urls.map((url) => {
+            getRequest(url).then((response) => {
+              const { responseXML } = response.request;
+              const parsedPosts = parsData(responseXML);
+              compaireData(parsedPosts, state.posts, watchedState.posts);
+              console.log(parsedPosts);
+            });
+          });
+        //const promise = Promise.all(promises);
+        watchedState.form.status = 'filling';
+        let timerId = setTimeout(function tick() {
+          rerender(state.form.urls);
+          //clearTimeout(timerId);
+          timerId = setTimeout(tick, 5000); // (*)
+        }, 5000);
+        //clearTimeout(timerId);
+        //??
+      });
     });
-    watchedState.form.status = 'filling'; //??
-  });
 };
+
+export default app;
