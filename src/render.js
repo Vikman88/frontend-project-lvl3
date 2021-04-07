@@ -18,36 +18,34 @@ const buildModalWindow = (content, el) => {
   modalLink.querySelector('a').href = content.link;
 };
 
-const renderFields = (items, el) => {
-  return items.reduce((acc, item) => {
-    const liItems = createEl('li');
-    const button = createEl('button');
-    button.type = 'button';
-    button.classList.add('btn', 'btn-primary', 'btn-sm');
-    button.setAttribute('data-toggle', 'modal');
-    button.setAttribute('data-target', '#modal');
-    button.textContent = i18n.t(contentPaths.button());
-    button.setAttribute('data-id', item.id);
-    liItems.classList.add(
-      'list-group-item',
-      'd-flex',
-      'justify-content-between',
-      'align-items-start'
-    );
-    const a = createEl('a');
-    a.href = item.link;
-    if (item.touched) {
-      buildModalWindow(item, el);
-      a.classList.add('font-weight-normal');
-    } else a.classList.add('font-weight-bold');
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.setAttribute('data-id', item.id);
-    a.textContent = item.title;
-    liItems.append(a, button);
-    return [...acc, liItems];
-  }, []);
-};
+const renderFields = (items, el) => items.reduce((acc, item) => {
+  const liItems = createEl('li');
+  const button = createEl('button');
+  button.type = 'button';
+  button.classList.add('btn', 'btn-primary', 'btn-sm');
+  button.setAttribute('data-toggle', 'modal');
+  button.setAttribute('data-target', '#modal');
+  button.textContent = i18n.t(contentPaths.button());
+  button.setAttribute('data-id', item.id);
+  liItems.classList.add(
+    'list-group-item',
+    'd-flex',
+    'justify-content-between',
+    'align-items-start',
+  );
+  const a = createEl('a');
+  a.href = item.link;
+  if (item.touched) {
+    buildModalWindow(item, el);
+    a.classList.add('font-weight-normal');
+  } else a.classList.add('font-weight-bold');
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.setAttribute('data-id', item.id);
+  a.textContent = item.title;
+  liItems.append(a, button);
+  return [...acc, liItems];
+}, []);
 
 const renderContent = (posts, el) => {
   el.feedsField.innerHTML = '';
