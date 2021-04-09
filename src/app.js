@@ -99,14 +99,13 @@ const parsData = (data) => {
 
 const getRequest = (url) => {
   const promise = axios
-    .get(`${variables.proxy()}${encodeURIComponent(url)}`)
-    .then((response) => response)
-    .catch((error) => error);
+    .get(`${variables.proxy()}${encodeURIComponent(url)}`);
   return promise;
 };
 
-export default async () => {
-  await i18n
+export default () => {
+  console.log('Hey!');
+  i18n
     .init({
       lng: 'ru',
       debug: false,
