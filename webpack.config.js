@@ -9,8 +9,10 @@ const filename = (ext) => (isDev ? `[name].[hash].${ext}` : `[name].${ext}`);
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
-  mode: 'development',
-  entry: './index.js',
+  mode: isProd ? 'production' : 'development',
+  entry: {
+    index: './index.js',
+  },
   output: {
     filename: filename('js'),
     path: path.resolve(__dirname, 'dist'),
@@ -20,7 +22,7 @@ module.exports = {
     port: 4200,
     hot: isDev,
   },
-  //devtool: isDev ? 'eval-source-map' : 'source-map',
+  devtool: isDev ? 'eval-source-map' : 'source-map',
   plugins: [
     new HtmlWebpackPlugin({
       template: 'template.html',
