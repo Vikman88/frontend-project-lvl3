@@ -123,7 +123,7 @@ export default (state, elements) => {
     'form.status': () => statusSwitch(state, elements),
     posts: () => renderContent(state.posts, elements),
   };
-  const watchedState = onChange(state, (path, value) => {
+  const watchedState = onChange(state, (path) => {
     if (watcherFn[path]) {
       watcherFn[path]();
     }
