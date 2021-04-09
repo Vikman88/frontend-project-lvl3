@@ -10,10 +10,5 @@ build:
 dev:
 	npm run dev
 
-test:
-	npm test
-
 lint:
 	npx eslint .
-
-.PHONY: test

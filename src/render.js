@@ -109,6 +109,9 @@ const statusSwitch = (state, el) => {
       el.feedbackForm.textContent = state.networkAlert;
       el.input.value = '';
       break;
+    case 'updating':
+      renderContent(state.posts, el);
+      break;
     default:
       throw Error(`Unknown form status: ${status}`);
   }
@@ -121,8 +124,6 @@ export default (state, elements) => {
     posts: () => renderContent(state.posts, elements),
   };
   const watchedState = onChange(state, (path, value) => {
-    console.log(path, value);
-    console.log(state);
     if (watcherFn[path]) {
       watcherFn[path]();
     }
