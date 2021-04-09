@@ -47,7 +47,8 @@ const renderFields = (items, el) => items.reduce((acc, item) => {
   return [...acc, liItems];
 }, []);
 
-const renderContent = (posts, el) => {
+const renderContent = (posts, elements) => {
+  const el = elements;
   el.feedsField.innerHTML = '';
   el.postsField.innerHTML = '';
   const h2Feeds = createEl('h2');
@@ -74,7 +75,8 @@ const renderContent = (posts, el) => {
   });
 };
 
-const renderMessageForm = (state, el) => {
+const renderMessageForm = (state, elements) => {
+  const el = elements;
   if (state.valid) {
     el.input.classList.remove('is-invalid');
     el.feedbackForm.classList.remove('text-danger');
@@ -86,7 +88,8 @@ const renderMessageForm = (state, el) => {
   }
 };
 
-const statusSwitch = (state, el) => {
+const statusSwitch = (state, elements) => {
+  const el = elements;
   const { status } = state.form;
   switch (status) {
     case 'sending':
@@ -109,6 +112,9 @@ const statusSwitch = (state, el) => {
       el.feedbackForm.textContent = state.networkAlert;
       el.input.value = '';
       break;
+    case 'updating':
+      renderContent(state.posts, el);
+      break;
     default:
       throw Error(`Unknown form status: ${status}`);
   }
@@ -120,9 +126,7 @@ export default (state, elements) => {
     'form.status': () => statusSwitch(state, elements),
     posts: () => renderContent(state.posts, elements),
   };
-  const watchedState = onChange(state, (path, value) => {
-    console.log(path, value);
-    console.log(state);
+  const watchedState = onChange(state, (path) => {
     if (watcherFn[path]) {
       watcherFn[path]();
     }

@@ -22,7 +22,6 @@ module.exports = {
     port: 4200,
     hot: isDev,
   },
-  devtool: isDev ? 'eval-source-map' : 'source-map',
   plugins: [
     new HtmlWebpackPlugin({
       template: 'template.html',
