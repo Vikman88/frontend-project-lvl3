@@ -99,7 +99,9 @@ const parsData = (data) => {
 
 const getRequest = (url) => {
   const promise = axios
-    .get(`${variables.proxy()}${encodeURIComponent(url)}`);
+    .get(`${variables.proxy()}${encodeURIComponent(url)}`)
+    .then((response) => response)
+    .catch((error) => error);
   return promise;
 };
 
