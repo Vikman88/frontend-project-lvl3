@@ -62,10 +62,12 @@ const updateCollection = (responsePosts, loadedPosts, state) => {
   } else state.push(responsePosts);
 };
 
-const touchElements = (collection, id) => {
+const touchElements = (collection, currentId) => {
   collection.forEach((feed) => {
     feed.items.forEach((post) => {
-      if (post.id === parseInt(id, 10)) post.touched = true;
+      const { id } = post;
+      const item = post;
+      if (id === parseInt(currentId, 10)) item.touched = true;
     });
   });
 };
