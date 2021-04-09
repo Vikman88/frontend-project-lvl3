@@ -196,7 +196,13 @@ export default () => {
             setTimeout(eternal, variables.interval());
           };
           setTimeout(eternal, 100);
-        })
+        }).catch((errors) => {
+          if (errors.message === i18n.t(alertPaths.invalidRssUrl())) {
+            watchedState.networkAlert = errors.message;
+          } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
+          watchedState.form.status = 'failed';
+          watchedState.form.urls.pop();
+        });
       });
     });
 };
