@@ -103,8 +103,8 @@ const getRequest = (url) => {
   return promise;
 };
 
-export default () => {
-  i18n
+export default async () => {
+  await i18n
     .init({
       lng: 'ru',
       debug: false,
