@@ -171,6 +171,7 @@ export default async () => {
         getRequest(responseUrl).then((response) => {
           const { request } = response;
           const { responseXML } = request;
+          console.log(response);
           if (!responseXML) {
             throw new Error(i18n.t(alertPaths.invalidRssUrl()));
           }
@@ -199,6 +200,7 @@ export default async () => {
           };
           setTimeout(eternal, 100);
         }).catch((errors) => {
+          console.log(errors, errors.message, errors.status);
           if (errors.message === i18n.t(alertPaths.invalidRssUrl())) {
             watchedState.networkAlert = errors.message;
           } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
