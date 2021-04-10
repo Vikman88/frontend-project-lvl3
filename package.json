@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "RSS aggregator",
-  "main": "src/app.js",
+  "main": "src/init.js",
   "scripts": {
     "test": "jest --colors",
     "dev": "cross-env NODE_ENV=development webpack --mode development",
