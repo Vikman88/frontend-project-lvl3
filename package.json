@@ -25,7 +25,6 @@
     "url": "https://github.com/Vikman88/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/Vikman88/frontend-project-lvl3#readme",
-  "type": "module",
   "jest": {
     "verbose": true,
     "testURL": "http://localhost/"
