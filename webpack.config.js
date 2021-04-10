@@ -1,47 +1,18 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ESLintPlugin = require('eslint-webpack-plugin');
-
-const isDev = process.env.NODE_ENV === 'development';
-const isProd = !isDev;
-const filename = (ext) => (isDev ? `[name].[hash].${ext}` : `[name].${ext}`);
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  context: path.resolve(__dirname, 'src'),
-  mode: isProd ? 'production' : 'development',
-  entry: {
-    index: './index.js',
-  },
+  mode: process.env.NODE_ENV || 'development',
+  entry: './src/index.js',
   output: {
-    filename: filename('js'),
     path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
   },
   devServer: {
-    open: true,
-    port: 4200,
-    hot: isDev,
+    port: 9000,
   },
-  devtool: isDev ? 'eval' : 'source-map',
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: 'template.html',
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new ESLintPlugin({
-      failOnError: !isDev,
-      failOnWarning: !isDev,
-    }),
-    new CleanWebpackPlugin(),
-  ],
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -49,6 +20,16 @@ module.exports = {
           loader: 'babel-loader',
         },
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'RSS aggregator',
+      template: 'index.html',
+    }),
+  ],
 };
