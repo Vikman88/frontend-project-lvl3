@@ -104,7 +104,6 @@ const getRequest = (url) => {
 };
 
 export default () => {
-  console.log('Hey!');
   i18n
     .init({
       lng: 'ru',

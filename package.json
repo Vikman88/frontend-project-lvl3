@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "RSS aggregator",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jest --colors",
     "dev": "cross-env NODE_ENV=development webpack --mode development",
@@ -25,6 +25,7 @@
     "url": "https://github.com/Vikman88/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/Vikman88/frontend-project-lvl3#readme",
+  "type": "module",
   "jest": {
     "verbose": true,
     "testURL": "http://localhost/"
