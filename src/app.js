@@ -99,7 +99,7 @@ const parsData = (data) => {
 
 const getRequest = (url) => {
   const promise = axios
-    .get(`${variables.proxy()}${encodeURIComponent(url)}&disableCache=true`);
+    .get(`${variables.proxy()}${encodeURIComponent(url)}`);
   return promise;
 };
 
