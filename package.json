@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "RSS aggregator",
-  "main": "src/init.js",
+  "main": "src/app.js",
   "scripts": {
     "test": "jest --colors",
     "dev": "cross-env NODE_ENV=development webpack --mode development",
@@ -53,19 +53,13 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@popperjs/core": "^2.9.2",
     "axios": "^0.21.1",
-    "bootstrap": "^5.0.0-beta3",
+    "bootstrap": "^4.6.0",
     "crc-32": "^1.2.0",
-    "debug": "^4.3.1",
     "i18next": "^20.2.1",
     "jquery": "^3.6.0",
     "on-change": "^2.2.3",
     "popper.js": "^1.16.1",
-    "postcss": "^8.2.10",
-    "postcss-loader": "^5.2.0",
-    "sass": "^1.32.8",
-    "sass-loader": "^11.0.1",
     "yup": "^0.32.9"
   }
 }
