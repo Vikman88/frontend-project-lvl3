@@ -204,7 +204,7 @@ export default () => {
         }).catch((errors) => {
           if (errors.message === i18n.t(alertPaths.invalidRssUrl())) {
             watchedState.networkAlert = errors.message;
-          } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
+          } else watchedState.networkAlert = i18n.t(alertPaths.success());
           watchedState.form.status = 'failed';
           watchedState.form.urls.pop();
         });
