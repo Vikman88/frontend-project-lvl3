@@ -24,7 +24,6 @@ const toResponseXML = (response) => {
   const xmlContent = response.data.contents;
   const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
   const rss = responseXML.querySelector('rss');
-  console.log(rss);
   if (!rss) throw new Error('Страница не найдена');
   return responseXML;
 };
@@ -173,7 +172,6 @@ export default () => {
         watchedState.networkAlert = null;
         watchedState.form.status = 'sending';
         getRequest(responseUrl).then((response) => {
-          console.log(response);
           const responseXML = toResponseXML(response);
           if (!responseXML) {
             throw new Error(i18n.t(alertPaths.invalidRssUrl()));
