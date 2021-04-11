@@ -62,6 +62,10 @@
     "jquery": "^3.6.0",
     "on-change": "^2.2.3",
     "popper.js": "^1.16.1",
+    "postcss": "^8.2.10",
+    "postcss-loader": "^5.2.0",
+    "sass": "^1.32.8",
+    "sass-loader": "^11.0.1",
     "yup": "^0.32.9"
   }
 }

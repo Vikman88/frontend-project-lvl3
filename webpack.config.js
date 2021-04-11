@@ -21,6 +21,7 @@ module.exports = {
     port: 4200,
     hot: isDev,
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {

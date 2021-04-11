@@ -169,6 +169,7 @@ export default () => {
         watchedState.networkAlert = null;
         watchedState.form.status = 'sending';
         getRequest(responseUrl).then((response) => {
+          console.log(response);
           const { request } = response;
           const { responseXML } = request;
           if (!responseXML) {
