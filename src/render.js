@@ -111,6 +111,7 @@ const statusSwitch = (state, elements, i18n) => {
       el.feedbackForm.classList.add('text-success');
       el.feedbackForm.textContent = state.networkAlert;
       el.input.value = '';
+      renderContent(state.posts, el, i18n);
       break;
     case 'updating':
       renderContent(state.posts, el, i18n);

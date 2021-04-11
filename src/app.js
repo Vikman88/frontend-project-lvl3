@@ -173,6 +173,8 @@ export default () => {
         if (!rss) throw new Error('Страница не найдена');
         watchedState.form.urls.push(responseUrl);
         watchedState.networkAlert = i18n.t(alertPaths.success());
+        const parsedPosts = parsData(responseXML);
+        updateCollection(parsedPosts, state.posts, watchedState.posts);
         watchedState.form.status = 'rendering';
       })
       .then(() => {
@@ -196,7 +198,7 @@ export default () => {
           });
           setTimeout(eternal, variables.interval());
         };
-        setTimeout(eternal, 100);
+        setTimeout(eternal, 5000);
       })
       .catch((errors) => {
         if (errors.message === 'Страница не найдена') {
