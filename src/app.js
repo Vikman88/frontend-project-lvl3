@@ -6,7 +6,7 @@ import render from './render.js';
 import resources from './locales';
 
 const variables = {
-  proxy: () => 'https://hexlet-allorigins.herokuapp.com/raw?url=',
+  proxy: () => 'https://hexlet-allorigins.herokuapp.com/get?url=',
   goodStatus: () => 200,
   interval: () => 5000,
 };
@@ -21,8 +21,9 @@ const alertPaths = {
 
 const toResponseXML = (response) => {
   const parserXML = new DOMParser();
-  const xmlContent = response.request.response;
+  const xmlContent = response.data.contents;
   const responseXML = parserXML.parseFromString(xmlContent, 'application/xml');
+  console.log(responseXML);
   return responseXML;
 };
 
@@ -170,8 +171,7 @@ export default () => {
         watchedState.form.status = 'sending';
         getRequest(responseUrl).then((response) => {
           console.log(response);
-          const { request } = response;
-          const { responseXML } = request;
+          const responseXML = toResponseXML(response);
           if (!responseXML) {
             throw new Error(i18n.t(alertPaths.invalidRssUrl()));
           }
