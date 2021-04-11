@@ -1,5 +1,4 @@
 import onChange from 'on-change';
-import i18n from 'i18next';
 
 const contentPaths = {
   button: () => 'field.posts.button',
@@ -18,36 +17,37 @@ const buildModalWindow = (content, el) => {
   modalLink.querySelector('a').href = content.link;
 };
 
-const renderFields = (items, el) => items.reduce((acc, item) => {
-  const liItems = createEl('li');
-  const button = createEl('button');
-  button.type = 'button';
-  button.classList.add('btn', 'btn-primary', 'btn-sm');
-  button.setAttribute('data-toggle', 'modal');
-  button.setAttribute('data-target', '#modal');
-  button.textContent = i18n.t(contentPaths.button());
-  button.setAttribute('data-id', item.id);
-  liItems.classList.add(
-    'list-group-item',
-    'd-flex',
-    'justify-content-between',
-    'align-items-start',
-  );
-  const a = createEl('a');
-  a.href = item.link;
-  if (item.touched) {
-    buildModalWindow(item, el);
-    a.classList.add('font-weight-normal');
-  } else a.classList.add('font-weight-bold');
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.setAttribute('data-id', item.id);
-  a.textContent = item.title;
-  liItems.append(a, button);
-  return [...acc, liItems];
-}, []);
+const renderFields = (items, el, i18n) =>
+  items.reduce((acc, item) => {
+    const liItems = createEl('li');
+    const button = createEl('button');
+    button.type = 'button';
+    button.classList.add('btn', 'btn-primary', 'btn-sm');
+    button.setAttribute('data-toggle', 'modal');
+    button.setAttribute('data-target', '#modal');
+    button.textContent = i18n.t(contentPaths.button());
+    button.setAttribute('data-id', item.id);
+    liItems.classList.add(
+      'list-group-item',
+      'd-flex',
+      'justify-content-between',
+      'align-items-start'
+    );
+    const a = createEl('a');
+    a.href = item.link;
+    if (item.touched) {
+      buildModalWindow(item, el);
+      a.classList.add('font-weight-normal');
+    } else a.classList.add('font-weight-bold');
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('data-id', item.id);
+    a.textContent = item.title;
+    liItems.append(a, button);
+    return [...acc, liItems];
+  }, []);
 
-const renderContent = (posts, elements) => {
+const renderContent = (posts, elements, i18n) => {
   const el = elements;
   el.feedsField.innerHTML = '';
   el.postsField.innerHTML = '';
@@ -70,7 +70,7 @@ const renderContent = (posts, elements) => {
     p.textContent = post.description;
     li.append(h3, p);
     ulFeeds.prepend(li);
-    const renderedFields = renderFields(post.items, el);
+    const renderedFields = renderFields(post.items, el, i18n);
     ulPosts.prepend(...renderedFields);
   });
 };
@@ -88,7 +88,7 @@ const renderMessageForm = (state, elements) => {
   }
 };
 
-const statusSwitch = (state, elements) => {
+const statusSwitch = (state, elements, i18n) => {
   const el = elements;
   const { status } = state.form;
   switch (status) {
@@ -113,18 +113,18 @@ const statusSwitch = (state, elements) => {
       el.input.value = '';
       break;
     case 'updating':
-      renderContent(state.posts, el);
+      renderContent(state.posts, el, i18n);
       break;
     default:
       throw Error(`Unknown form status: ${status}`);
   }
 };
 
-export default (state, elements) => {
+export default (state, elements, i18n) => {
   const watcherFn = {
     'form.field': () => renderMessageForm(state.form.field, elements),
-    'form.status': () => statusSwitch(state, elements),
-    posts: () => renderContent(state.posts, elements),
+    'form.status': () => statusSwitch(state, elements, i18n),
+    posts: () => renderContent(state.posts, elements, i18n),
   };
   const watchedState = onChange(state, (path) => {
     if (watcherFn[path]) {

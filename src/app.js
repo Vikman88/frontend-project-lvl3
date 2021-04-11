@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 import axios from 'axios';
-import i18n from 'i18next';
+import i18next from 'i18next';
 import crc32 from 'crc-32';
 import render from './render.js';
 import resources from './locales';
@@ -32,11 +32,7 @@ const hashCode = (string) => {
 };
 
 const validate = (url, listUrls) => {
-  const shema = yup.string()
-    .trim()
-    .required()
-    .url()
-    .notOneOf(listUrls);
+  const shema = yup.string().trim().required().url().notOneOf(listUrls);
   try {
     shema.validateSync(url);
     return null;
@@ -105,6 +101,7 @@ const getRequest = (url) => {
 };
 
 export default () => {
+  const i18n = i18next.createInstance();
   i18n
     .init({
       lng: 'ru',
@@ -121,63 +118,66 @@ export default () => {
           url: i18n.t(alertPaths.invalid()),
         },
       });
+    });
+  const elements = {
+    input: document.querySelector('input'),
+    form: document.querySelector('form'),
+    feedbackForm: document.querySelector('.feedback'),
+    button: document.querySelector('[type="submit"]'),
+    feedsField: document.querySelector('.feeds'),
+    postsField: document.querySelector('.posts'),
+    modalHead: document.querySelector('.modal-header'),
+    modalBody: document.querySelector('.modal-body'),
+    modalFooter: document.querySelector('.modal-footer'),
+  };
 
-      const elements = {
-        input: document.querySelector('input'),
-        form: document.querySelector('form'),
-        feedbackForm: document.querySelector('.feedback'),
-        button: document.querySelector('[type="submit"]'),
-        feedsField: document.querySelector('.feeds'),
-        postsField: document.querySelector('.posts'),
-        modalHead: document.querySelector('.modal-header'),
-        modalBody: document.querySelector('.modal-body'),
-        modalFooter: document.querySelector('.modal-footer'),
+  const state = {
+    form: {
+      status: 'filling',
+      urls: [],
+      field: {
+        error: null,
+        valid: true,
+      },
+    },
+    posts: [],
+    networkAlert: null,
+  };
+
+  const watchedState = render(state, elements, i18n);
+
+  const { form } = elements;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const listUrls = state.form.urls;
+    const formData = new FormData(e.target);
+    const responseUrl = formData.get('url');
+    const error = validate(responseUrl, listUrls);
+    if (error) {
+      watchedState.form.field = {
+        error,
+        valid: false,
       };
-
-      const state = {
-        form: {
-          status: 'filling',
-          urls: [],
-          field: {
-            error: null,
-            valid: true,
-          },
-        },
-        posts: [],
-        networkAlert: null,
-      };
-
-      const watchedState = render(state, elements);
-
-      const { form } = elements;
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const listUrls = state.form.urls;
-        const formData = new FormData(e.target);
-        const responseUrl = formData.get('url');
-        const error = validate(responseUrl, listUrls);
-        if (error) {
-          watchedState.form.field = {
-            error,
-            valid: false,
-          };
-          return;
-        }
-        watchedState.form.field = {
-          error,
-          valid: true,
-        };
-        watchedState.networkAlert = null;
-        watchedState.form.status = 'sending';
-        getRequest(responseUrl).then((response) => {
-          const responseXML = toResponseXML(response);
-          const rss = responseXML.querySelector('rss');
-          if (!rss) throw new Error('Страница не найдена');
-          watchedState.form.urls.push(responseUrl);
-          watchedState.networkAlert = i18n.t(alertPaths.success());
-          watchedState.form.status = 'rendering';
-        }).then(() => {
-          const rerender = (urls) => urls.forEach((url) => {
+      return;
+    }
+    watchedState.form.field = {
+      error,
+      valid: true,
+    };
+    watchedState.networkAlert = null;
+    watchedState.form.status = 'sending';
+    getRequest(responseUrl)
+      .then((response) => {
+        const responseXML = toResponseXML(response);
+        const rss = responseXML.querySelector('rss');
+        if (!rss) throw new Error('Страница не найдена');
+        watchedState.form.urls.push(responseUrl);
+        watchedState.networkAlert = i18n.t(alertPaths.success());
+        watchedState.form.status = 'rendering';
+      })
+      .then(() => {
+        const rerender = (urls) =>
+          urls.forEach((url) => {
             getRequest(url).then((response) => {
               const responseXML = toResponseXML(response);
               const parsedPosts = parsData(responseXML);
@@ -185,25 +185,25 @@ export default () => {
             });
           });
 
-          const eternal = () => {
-            watchedState.form.status = 'filling';
-            rerender(state.form.urls);
-            watchedState.form.status = 'updating';
-            elements.postsField.addEventListener('click', (val) => {
-              const { target } = val;
-              const { id } = target.dataset;
-              touchElements(watchedState.posts, id);
-            });
-            setTimeout(eternal, variables.interval());
-          };
-          setTimeout(eternal, 100);
-        }).catch((errors) => {
-          if (errors.message === 'Страница не найдена') {
-            watchedState.networkAlert = i18n.t(alertPaths.invalidRssUrl());
-          } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
-          watchedState.form.status = 'failed';
-          watchedState.form.urls.pop();
-        });
+        const eternal = () => {
+          watchedState.form.status = 'filling';
+          rerender(state.form.urls);
+          watchedState.form.status = 'updating';
+          elements.postsField.addEventListener('click', (val) => {
+            const { target } = val;
+            const { id } = target.dataset;
+            touchElements(watchedState.posts, id);
+          });
+          setTimeout(eternal, variables.interval());
+        };
+        setTimeout(eternal, 100);
+      })
+      .catch((errors) => {
+        if (errors.message === 'Страница не найдена') {
+          watchedState.networkAlert = i18n.t(alertPaths.invalidRssUrl());
+        } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
+        watchedState.form.status = 'failed';
+        watchedState.form.urls.pop();
       });
-    });
+  });
 };

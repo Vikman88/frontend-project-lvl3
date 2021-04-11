@@ -1,4 +1,3 @@
-
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -45,10 +44,10 @@ module.exports = {
         collapseWhitespace: isProd,
       },
     }),
-    new ESLintPlugin({
+    /* new ESLintPlugin({
       failOnError: !isDev,
       failOnWarning: !isDev,
-    }),
+    }), */
     new CleanWebpackPlugin(),
   ],
 };
