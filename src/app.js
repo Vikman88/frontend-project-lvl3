@@ -6,7 +6,7 @@ import render from './render.js';
 import resources from './locales';
 
 const variables = {
-  proxy: () => 'https://hexlet-allorigins.herokuapp.com/get?url=',
+  proxy: () => 'https://hexlet-allorigins.herokuapp.com',
   goodStatus: () => 200,
   interval: () => 5000,
 };
@@ -99,8 +99,9 @@ const parsData = (data) => {
 };
 
 const getRequest = (url) => {
-  const makeUrl = new URL(variables.proxy());
+  const makeUrl = new URL('get', 'https://hexlet-allorigins.herokuapp.com');
   makeUrl.searchParams.set('url', url);
+  makeUrl.searchParams.set('disableCache', 'true');
   const promise = axios.get(makeUrl);
   return promise;
 };
