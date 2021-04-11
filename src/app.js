@@ -174,8 +174,9 @@ export default () => {
         watchedState.form.urls.push(responseUrl);
         watchedState.networkAlert = i18n.t(alertPaths.success());
         const parsedPosts = parsData(responseXML);
-        updateCollection(parsedPosts, state.posts, watchedState.posts);
         watchedState.form.status = 'rendering';
+        updateCollection(parsedPosts, state.posts, watchedState.posts);
+        watchedState.form.status = 'filling';
       })
       .then(() => {
         const rerender = (urls) =>
@@ -184,7 +185,6 @@ export default () => {
               const responseXML = toResponseXML(response);
               const parsedPosts = parsData(responseXML);
               updateCollection(parsedPosts, state.posts, watchedState.posts);
-              watchedState.form.status = 'filling';
             });
           });
 
