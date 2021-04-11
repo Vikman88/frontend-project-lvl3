@@ -101,7 +101,6 @@ const parsData = (data) => {
 const getRequest = (url) => {
   const makeUrl = new URL(variables.proxy());
   makeUrl.searchParams.set('url', url);
-  makeUrl.searchParams.set('disableCache', true);
   const promise = axios.get(makeUrl);
   return promise;
 };
