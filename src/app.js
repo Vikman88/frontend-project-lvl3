@@ -184,6 +184,7 @@ export default () => {
               const responseXML = toResponseXML(response);
               const parsedPosts = parsData(responseXML);
               updateCollection(parsedPosts, state.posts, watchedState.posts);
+              watchedState.form.status = 'filling';
             });
           });
 
