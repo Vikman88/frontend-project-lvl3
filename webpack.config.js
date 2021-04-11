@@ -9,9 +9,9 @@ const isProd = !isDev;
 const filename = (ext) => (isDev ? `[name].[hash].${ext}` : `[name].${ext}`);
 
 module.exports = {
-  context: path.resolve(__dirname, 'src'),
+  //context: path.resolve(__dirname, 'src'),
   mode: isProd ? 'production' : 'development',
-  entry: './index.js',
+  entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: filename('js'),
@@ -39,7 +39,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       title: 'RSS aggregator',
-      template: './index.html',
+      template: 'index.html',
+      minify: {
+        collapseWhitespace: isProd,
+      },
     }),
+    new ESLintPlugin({
+      failOnError: !isDev,
+      failOnWarning: !isDev,
+    }),
+    new CleanWebpackPlugin(),
   ],
 };
