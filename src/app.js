@@ -22,8 +22,10 @@ const alertPaths = {
 const toResponseXML = (response) => {
   const parserXML = new DOMParser();
   const xmlContent = response.data.contents;
-  const responseXML = parserXML.parseFromString(xmlContent, 'application/xml');
-  console.log(responseXML);
+  const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
+  const rss = responseXML.querySelector('rss');
+  console.log(rss);
+  if (!rss) throw new Error('Страница не найдена');
   return responseXML;
 };
 
@@ -102,8 +104,7 @@ const getRequest = (url) => {
   const makeUrl = new URL('get', 'https://hexlet-allorigins.herokuapp.com');
   makeUrl.searchParams.set('url', url);
   makeUrl.searchParams.set('disableCache', 'true');
-  const promise = axios.get(makeUrl);
-  return promise;
+  return axios.get(makeUrl);
 };
 
 export default () => {
@@ -202,9 +203,9 @@ export default () => {
           };
           setTimeout(eternal, 100);
         }).catch((errors) => {
-          if (errors.message === i18n.t(alertPaths.invalidRssUrl())) {
-            watchedState.networkAlert = errors.message;
-          } else watchedState.networkAlert = i18n.t(alertPaths.success());
+          if (errors.message === 'Страница не найдена') {
+            watchedState.networkAlert = i18n.t(alertPaths.invalidRssUrl());
+          } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
           watchedState.form.status = 'failed';
           watchedState.form.urls.pop();
         });
