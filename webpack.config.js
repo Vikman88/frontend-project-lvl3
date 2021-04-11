@@ -1,15 +1,25 @@
-const path = require('path');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
+
+const isDev = process.env.NODE_ENV === 'development';
+const isProd = !isDev;
+const filename = (ext) => (isDev ? `[name].[hash].${ext}` : `[name].${ext}`);
 
 module.exports = {
-  mode: process.env.NODE_ENV || 'development',
+  //context: path.resolve(__dirname, 'src'),
+  mode: isProd ? 'production' : 'development',
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: filename('js'),
   },
   devServer: {
-    port: 9000,
+    open: true,
+    port: 4200,
+    hot: isDev,
   },
   module: {
     rules: [
