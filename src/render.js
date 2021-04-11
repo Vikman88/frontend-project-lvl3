@@ -1,6 +1,5 @@
 import onChange from 'on-change';
 import i18n from 'i18next';
-import 'bootstrap';
 
 const contentPaths = {
   button: () => 'field.posts.button',

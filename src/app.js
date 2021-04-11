@@ -103,7 +103,7 @@ const getRequest = (url) => {
   const makeURL = new URL('/get', 'https://hexlet-allorigins.herokuapp.com');
   makeURL.searchParams.set('url', url);
   makeURL.searchParams.set('disableCache', 'true');
-  return axios.get(makeURL);
+  return axios.get(makeURL.toString());
 };
 
 export default () => {
