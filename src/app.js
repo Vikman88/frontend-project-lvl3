@@ -23,8 +23,6 @@ const toResponseXML = (response) => {
   const parserXML = new DOMParser();
   const xmlContent = response.data.contents;
   const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
-  const rss = responseXML.querySelector('rss');
-  if (!rss) throw new Error('Страница не найдена');
   return responseXML;
 };
 
@@ -173,9 +171,8 @@ export default () => {
         watchedState.form.status = 'sending';
         getRequest(responseUrl).then((response) => {
           const responseXML = toResponseXML(response);
-          if (!responseXML) {
-            throw new Error(i18n.t(alertPaths.invalidRssUrl()));
-          }
+          const rss = responseXML.querySelector('rss');
+          if (!rss) throw new Error('Страница не найдена');
           watchedState.form.urls.push(responseUrl);
           watchedState.networkAlert = i18n.t(alertPaths.success());
           watchedState.form.status = 'rendering';
