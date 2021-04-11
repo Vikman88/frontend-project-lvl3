@@ -101,10 +101,11 @@ const parsData = (data) => {
 };
 
 const getRequest = (url) => {
-  const makeUrl = new URL('get', 'https://hexlet-allorigins.herokuapp.com');
-  makeUrl.searchParams.set('url', url);
-  makeUrl.searchParams.set('disableCache', 'true');
-  return axios.get(makeUrl);
+  const result = new URL('/get', 'https://hexlet-allorigins.herokuapp.com');
+  result.searchParams.set('url', url);
+  result.searchParams.set('disableCache', 'true');
+  const makeURL = result.toString();
+  return axios.get(makeURL);
 };
 
 export default () => {
