@@ -7,7 +7,6 @@ import resources from './locales';
 
 const variables = {
   proxy: () => 'https://hexlet-allorigins.herokuapp.com',
-  goodStatus: () => 200,
   interval: () => 5000,
 };
 const alertPaths = {
@@ -98,7 +97,7 @@ const parsData = (data) => {
 };
 
 const getRequest = (url) => {
-  const makeURL = new URL('/get', 'https://hexlet-allorigins.herokuapp.com');
+  const makeURL = new URL('/get', variables.proxy());
   makeURL.searchParams.set('url', url);
   makeURL.searchParams.set('disableCache', 'true');
   return axios.get(makeURL.toString());
@@ -123,6 +122,7 @@ export default () => {
         },
       });
     });
+
   const elements = {
     input: document.querySelector('input'),
     form: document.querySelector('form'),
@@ -170,6 +170,16 @@ export default () => {
     };
     watchedState.networkAlert = null;
     watchedState.form.status = 'sending';
+    const loadRss = (response) => {
+      const parsedPosts = parsData(response);
+      updateCollection(parsedPosts, state.posts, watchedState.posts);
+      watchedState.form.status = 'updating';
+      elements.postsField.addEventListener('click', (val) => {
+        const { target } = val;
+        const { id } = target.dataset;
+        touchElements(watchedState.posts, id);
+      });
+    };
     getRequest(responseUrl)
       .then((response) => {
         const responseXML = toResponseXML(response);
@@ -177,37 +187,21 @@ export default () => {
         if (!rss) throw new Error('Страница не найдена');
         watchedState.form.urls.push(responseUrl);
         watchedState.networkAlert = i18n.t(alertPaths.success());
-        const parsedPosts = parsData(responseXML);
         watchedState.form.status = 'rendering';
-        updateCollection(parsedPosts, state.posts, watchedState.posts);
-        elements.postsField.addEventListener('click', (val) => {
-          const { target } = val;
-          const { id } = target.dataset;
-          touchElements(watchedState.posts, id);
-        });
+        loadRss(responseXML);
         watchedState.form.status = 'filling';
       })
       .then(() => {
-        const rerender = (urls) => urls.forEach((url) => {
-          getRequest(url).then((response) => {
-            const responseXML = toResponseXML(response);
-            const parsedPosts = parsData(responseXML);
-            updateCollection(parsedPosts, state.posts, watchedState.posts);
-          });
-        });
-
         const eternal = () => {
           watchedState.form.status = 'filling';
-          rerender(state.form.urls);
-          watchedState.form.status = 'updating';
-          elements.postsField.addEventListener('click', (val) => {
-            const { target } = val;
-            const { id } = target.dataset;
-            touchElements(watchedState.posts, id);
+          const urls = state.form.urls;
+          urls.forEach((url) => {
+            const responseXML = toResponseXML(response);
+            loadRss(responseXML);
           });
           setTimeout(eternal, variables.interval());
         };
-        setTimeout(eternal, 5000);
+        setTimeout(eternal, variables.interval());
       })
       .catch((errors) => {
         if (errors.message === 'Страница не найдена') {
