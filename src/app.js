@@ -176,6 +176,11 @@ export default () => {
         const parsedPosts = parsData(responseXML);
         watchedState.form.status = 'rendering';
         updateCollection(parsedPosts, state.posts, watchedState.posts);
+        elements.postsField.addEventListener('click', (val) => {
+          const { target } = val;
+          const { id } = target.dataset;
+          touchElements(watchedState.posts, id);
+        });
         watchedState.form.status = 'filling';
       })
       .then(() => {
