@@ -32,7 +32,11 @@ const hashCode = (string) => {
 };
 
 const validate = (url, listUrls) => {
-  const shema = yup.string().trim().required().url().notOneOf(listUrls);
+  const shema = yup.string()
+    .trim()
+    .required()
+    .url()
+    .notOneOf(listUrls);
   try {
     shema.validateSync(url);
     return null;
@@ -184,14 +188,13 @@ export default () => {
         watchedState.form.status = 'filling';
       })
       .then(() => {
-        const rerender = (urls) =>
-          urls.forEach((url) => {
-            getRequest(url).then((response) => {
-              const responseXML = toResponseXML(response);
-              const parsedPosts = parsData(responseXML);
-              updateCollection(parsedPosts, state.posts, watchedState.posts);
-            });
+        const rerender = (urls) => urls.forEach((url) => {
+          getRequest(url).then((response) => {
+            const responseXML = toResponseXML(response);
+            const parsedPosts = parsData(responseXML);
+            updateCollection(parsedPosts, state.posts, watchedState.posts);
           });
+        });
 
         const eternal = () => {
           watchedState.form.status = 'filling';
