@@ -194,8 +194,9 @@ export default () => {
       .then(() => {
         const eternal = () => {
           watchedState.form.status = 'filling';
-          const urls = state.form.urls;
+          const { urls } = state.form;
           urls.forEach((url) => {
+            const response = getRequest(url);
             const responseXML = toResponseXML(response);
             loadRss(responseXML);
           });
