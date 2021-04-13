@@ -2,10 +2,10 @@ import * as yup from 'yup';
 import i18next from 'i18next';
 import render from './render.js';
 import resources from './locales';
-import validate from './validator';
-import getRequest from './sendRequest';
+import validate from './validator.js';
+import getRequest from './sendRequest.js';
 import { toResponseXML } from './utils.js';
-import loadRss from './loadRSS';
+import loadRss from './loadRSS.js';
 
 const variables = {
   interval: () => 5000,
