@@ -1,15 +1,15 @@
 import * as yup from 'yup';
-import axios from 'axios';
 import i18next from 'i18next';
 import crc32 from 'crc-32';
 import render from './render.js';
 import resources from './locales';
 import validate from './validator';
+import getRequest from './sendRequest';
 
 const variables = {
-  proxy: () => 'https://hexlet-allorigins.herokuapp.com',
   interval: () => 5000,
 };
+
 const alertPaths = {
   empty: () => 'form.messageAlert.empty',
   invalid: () => 'form.messageAlert.invalid',
@@ -30,8 +30,6 @@ const hashCode = (string) => {
   const hash = crc32.str(string);
   return hash;
 };
-
-
 
 const updateCollection = (responsePosts, loadedPosts, state) => {
   const loadedPostIds = loadedPosts.map(({ id }) => id);
@@ -83,13 +81,6 @@ const parsData = (data) => {
   }, []);
   const result = { ...getChildElements(data), items };
   return result;
-};
-
-const getRequest = (url) => {
-  const makeURL = new URL('/get', variables.proxy());
-  makeURL.searchParams.set('url', url);
-  makeURL.searchParams.set('disableCache', 'true');
-  return axios.get(makeURL.toString());
 };
 
 export default () => {
