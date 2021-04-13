@@ -4,6 +4,7 @@ import i18next from 'i18next';
 import crc32 from 'crc-32';
 import render from './render.js';
 import resources from './locales';
+import validate from './validator';
 
 const variables = {
   proxy: () => 'https://hexlet-allorigins.herokuapp.com',
@@ -30,19 +31,7 @@ const hashCode = (string) => {
   return hash;
 };
 
-const validate = (url, listUrls) => {
-  const shema = yup.string()
-    .trim()
-    .required()
-    .url()
-    .notOneOf(listUrls);
-  try {
-    shema.validateSync(url);
-    return null;
-  } catch (error) {
-    return error.message;
-  }
-};
+
 
 const updateCollection = (responsePosts, loadedPosts, state) => {
   const loadedPostIds = loadedPosts.map(({ id }) => id);
