@@ -140,13 +140,12 @@ export default () => {
       status: 'filling',
       urls: [],
       field: {
-        error: null,
+        message: null,
         valid: true,
       },
     },
     posts: [],
     currentId: null,
-    networkAlert: null,
   };
 
   const watchedState = render(state, elements, i18n);
@@ -157,16 +156,16 @@ export default () => {
     const listUrls = state.form.urls;
     const formData = new FormData(e.target);
     const responseUrl = formData.get('url');
-    const error = validate(responseUrl, listUrls);
-    if (error) {
+    const message = validate(responseUrl, listUrls);
+    if (message) {
       watchedState.form.field = {
-        error,
+        message,
         valid: false,
       };
       return;
     }
     watchedState.form.field = {
-      error,
+      message,
       valid: true,
     };
     watchedState.form.status = 'sending';
@@ -188,7 +187,7 @@ export default () => {
         if (!rss) throw new Error('Страница не найдена');
         watchedState.form.urls.push(responseUrl);
         watchedState.form.field = {
-          error: i18n.t(alertPaths.success()),
+          message: i18n.t(alertPaths.success()),
           valid: true,
         };
         loadRss(responseXML);
@@ -212,12 +211,12 @@ export default () => {
       .catch((errors) => {
         if (errors.message === 'Страница не найдена') {
           watchedState.form.field = {
-            error: i18n.t(alertPaths.invalidRssUrl()),
+            message: i18n.t(alertPaths.invalidRssUrl()),
             valid: false,
           };
         } else {
           watchedState.form.field = {
-            error: i18n.t(alertPaths.networkError()),
+            message: i18n.t(alertPaths.networkError()),
             valid: false,
           };
         }

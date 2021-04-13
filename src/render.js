@@ -79,10 +79,10 @@ const renderMessageForm = (state, elements) => {
   if (state.valid) {
     el.feedbackForm.classList.remove('text-danger');
     el.feedbackForm.classList.add('text-success');
-    el.feedbackForm.textContent = state.error;
+    el.feedbackForm.textContent = state.message;
   } else {
     el.feedbackForm.classList.add('text-danger');
-    el.feedbackForm.textContent = state.error;
+    el.feedbackForm.textContent = state.message;
   }
 };
 
