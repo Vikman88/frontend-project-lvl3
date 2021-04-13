@@ -145,6 +145,7 @@ export default () => {
       },
     },
     posts: [],
+    currentId: null,
     networkAlert: null,
   };
 
@@ -168,17 +169,17 @@ export default () => {
       error,
       valid: true,
     };
-    watchedState.networkAlert = null;
     watchedState.form.status = 'sending';
     const loadRss = (response) => {
       const parsedPosts = parsData(response);
       updateCollection(parsedPosts, state.posts, watchedState.posts);
-      watchedState.form.status = 'updating';
       elements.postsField.addEventListener('click', (val) => {
         const { target } = val;
         const { id } = target.dataset;
+        watchedState.currentId = id;
         touchElements(watchedState.posts, id);
       });
+      watchedState.form.status = 'rendering';
     };
     getRequest(responseUrl)
       .then((response) => {
@@ -186,19 +187,23 @@ export default () => {
         const rss = responseXML.querySelector('rss');
         if (!rss) throw new Error('Страница не найдена');
         watchedState.form.urls.push(responseUrl);
-        watchedState.networkAlert = i18n.t(alertPaths.success());
-        watchedState.form.status = 'rendering';
+        watchedState.form.field = {
+          error: i18n.t(alertPaths.success()),
+          valid: true,
+        };
         loadRss(responseXML);
         watchedState.form.status = 'filling';
       })
       .then(() => {
         const eternal = () => {
-          watchedState.form.status = 'filling';
           const { urls } = state.form;
           urls.forEach((url) => {
-            const response = getRequest(url);
-            const responseXML = toResponseXML(response);
-            loadRss(responseXML);
+            getRequest(url)
+              .then((response) => {
+                const responseXML = toResponseXML(response);
+                console.log(responseXML);
+                loadRss(responseXML);
+              });
           });
           setTimeout(eternal, variables.interval());
         };
@@ -206,8 +211,16 @@ export default () => {
       })
       .catch((errors) => {
         if (errors.message === 'Страница не найдена') {
-          watchedState.networkAlert = i18n.t(alertPaths.invalidRssUrl());
-        } else watchedState.networkAlert = i18n.t(alertPaths.networkError());
+          watchedState.form.field = {
+            error: i18n.t(alertPaths.invalidRssUrl()),
+            valid: false,
+          };
+        } else {
+          watchedState.form.field = {
+            error: i18n.t(alertPaths.networkError()),
+            valid: false,
+          };
+        }
         watchedState.form.status = 'failed';
         watchedState.form.urls.pop();
       });

@@ -17,7 +17,7 @@ const buildModalWindow = (content, el) => {
   modalLink.querySelector('a').href = content.link;
 };
 
-const renderFields = (items, el, i18n) => items.reduce((acc, item) => {
+const renderFields = (items, el, i18n, currentId) => items.reduce((acc, item) => {
   const liItems = createEl('li');
   const button = createEl('button');
   button.type = 'button';
@@ -34,10 +34,9 @@ const renderFields = (items, el, i18n) => items.reduce((acc, item) => {
   );
   const a = createEl('a');
   a.href = item.link;
-  if (item.touched) {
-    buildModalWindow(item, el);
-    a.classList.add('font-weight-normal');
-  } else a.classList.add('font-weight-bold');
+  if (item.touched) a.classList.add('font-weight-normal');
+  else a.classList.add('font-weight-bold');
+  if (item.id === parseInt(currentId, 10)) buildModalWindow(item, el);
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
   a.setAttribute('data-id', item.id);
@@ -46,7 +45,8 @@ const renderFields = (items, el, i18n) => items.reduce((acc, item) => {
   return [...acc, liItems];
 }, []);
 
-const renderContent = (posts, elements, i18n) => {
+const renderContent = (state, elements, i18n) => {
+  const { posts, currentId } = state;
   const el = elements;
   el.feedsField.innerHTML = '';
   el.postsField.innerHTML = '';
@@ -69,7 +69,7 @@ const renderContent = (posts, elements, i18n) => {
     p.textContent = post.description;
     li.append(h3, p);
     ulFeeds.prepend(li);
-    const renderedFields = renderFields(post.items, el, i18n);
+    const renderedFields = renderFields(post.items, el, i18n, currentId);
     ulPosts.prepend(...renderedFields);
   });
 };
@@ -77,11 +77,10 @@ const renderContent = (posts, elements, i18n) => {
 const renderMessageForm = (state, elements) => {
   const el = elements;
   if (state.valid) {
-    el.input.classList.remove('is-invalid');
     el.feedbackForm.classList.remove('text-danger');
-    el.feedbackForm.textContent = '';
+    el.feedbackForm.classList.add('text-success');
+    el.feedbackForm.textContent = state.error;
   } else {
-    el.input.classList.add('is-invalid');
     el.feedbackForm.classList.add('text-danger');
     el.feedbackForm.textContent = state.error;
   }
@@ -94,26 +93,24 @@ const statusSwitch = (state, elements, i18n) => {
     case 'sending':
       el.input.setAttribute('readonly', true);
       el.button.setAttribute('disabled', true);
-      el.input.focus();
       break;
     case 'filling':
       el.input.removeAttribute('readonly');
       el.button.removeAttribute('disabled');
+      el.input.value = '';
+      el.input.classList.remove('is-invalid');
+      el.input.focus();
       break;
     case 'failed':
       el.input.removeAttribute('readonly');
       el.button.removeAttribute('disabled');
-      el.feedbackForm.classList.add('text-danger');
-      el.feedbackForm.textContent = state.networkAlert;
+      el.input.classList.add('is-invalid');
+      el.input.focus();
       break;
     case 'rendering':
-      el.feedbackForm.classList.add('text-success');
-      el.feedbackForm.textContent = state.networkAlert;
-      el.input.value = '';
-      renderContent(state.posts, el, i18n);
-      break;
-    case 'updating':
-      renderContent(state.posts, el, i18n);
+      el.input.removeAttribute('readonly');
+      el.button.removeAttribute('disabled');
+      renderContent(state, el, i18n);
       break;
     default:
       throw Error(`Unknown form status: ${status}`);
@@ -124,7 +121,7 @@ export default (state, elements, i18n) => {
   const watcherFn = {
     'form.field': () => renderMessageForm(state.form.field, elements),
     'form.status': () => statusSwitch(state, elements, i18n),
-    posts: () => renderContent(state.posts, elements, i18n),
+    posts: () => renderContent(state, elements, i18n),
   };
   const watchedState = onChange(state, (path) => {
     if (watcherFn[path]) {
