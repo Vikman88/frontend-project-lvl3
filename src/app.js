@@ -1,10 +1,11 @@
 import * as yup from 'yup';
 import i18next from 'i18next';
-import crc32 from 'crc-32';
 import render from './render.js';
 import resources from './locales';
 import validate from './validator';
 import getRequest from './sendRequest';
+import { toResponseXML } from './utils.js';
+import loadRss from './loadRSS';
 
 const variables = {
   interval: () => 5000,
@@ -17,70 +18,6 @@ const alertPaths = {
   invalidRssUrl: () => 'networkAlert.invalidRssUrl',
   networkError: () => 'networkAlert.networkError',
   success: () => 'networkAlert.success',
-};
-
-const toResponseXML = (response) => {
-  const parserXML = new DOMParser();
-  const xmlContent = response.data.contents;
-  const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
-  return responseXML;
-};
-
-const hashCode = (string) => {
-  const hash = crc32.str(string);
-  return hash;
-};
-
-const updateCollection = (responsePosts, loadedPosts, state) => {
-  const loadedPostIds = loadedPosts.map(({ id }) => id);
-  if (loadedPostIds.includes(responsePosts.id)) {
-    const index = loadedPostIds.indexOf(responsePosts.id);
-    const findedField = loadedPosts[index];
-    const findedItems = findedField.items;
-    const findedIds = findedItems.map(({ id }) => id);
-    const targetItems = responsePosts.items;
-    const updatedItems = targetItems.reduce((acc, v) => {
-      const currentId = v.id;
-      if (!findedIds.includes(currentId)) acc.push(v);
-      return acc;
-    }, []);
-    state[index].items.unshift(...updatedItems);
-  } else state.push(responsePosts);
-};
-
-const touchElements = (collection, currentId) => {
-  collection.forEach((feed) => {
-    feed.items.forEach((post) => {
-      const { id } = post;
-      const item = post;
-      if (id === parseInt(currentId, 10)) item.touched = true;
-    });
-  });
-};
-
-const getChildElements = (el) => {
-  const title = el.querySelector('title').textContent;
-  const link = el.querySelector('link').textContent;
-  const description = el.querySelector('description').textContent;
-  const id = hashCode(title);
-  const result = {
-    title,
-    link,
-    description,
-    id,
-  };
-  return result;
-};
-
-const parsData = (data) => {
-  const itemsCollection = data.querySelectorAll('item');
-  const items = Array.from(itemsCollection).reduce((acc, item) => {
-    const childElements = getChildElements(item);
-    childElements.touched = false;
-    return [...acc, childElements];
-  }, []);
-  const result = { ...getChildElements(data), items };
-  return result;
 };
 
 export default () => {
@@ -149,17 +86,6 @@ export default () => {
       valid: true,
     };
     watchedState.form.status = 'sending';
-    const loadRss = (response) => {
-      const parsedPosts = parsData(response);
-      updateCollection(parsedPosts, state.posts, watchedState.posts);
-      elements.postsField.addEventListener('click', (val) => {
-        const { target } = val;
-        const { id } = target.dataset;
-        watchedState.currentId = id;
-        touchElements(watchedState.posts, id);
-      });
-      watchedState.form.status = 'rendering';
-    };
     getRequest(responseUrl)
       .then((response) => {
         const responseXML = toResponseXML(response);
@@ -170,7 +96,7 @@ export default () => {
           message: i18n.t(alertPaths.success()),
           valid: true,
         };
-        loadRss(responseXML);
+        loadRss(responseXML, state, watchedState, elements);
         watchedState.form.status = 'filling';
       })
       .then(() => {
@@ -180,8 +106,7 @@ export default () => {
             getRequest(url)
               .then((response) => {
                 const responseXML = toResponseXML(response);
-                console.log(responseXML);
-                loadRss(responseXML);
+                loadRss(responseXML, state, watchedState, elements);
               });
           });
           setTimeout(eternal, variables.interval());

@@ -45,9 +45,8 @@ const renderFields = (items, el, i18n, currentId) => items.reduce((acc, item) =>
   return [...acc, liItems];
 }, []);
 
-const renderContent = (state, elements, i18n) => {
+const renderContent = (state, el, i18n) => {
   const { posts, currentId } = state;
-  const el = elements;
   el.feedsField.innerHTML = '';
   el.postsField.innerHTML = '';
   const h2Feeds = createEl('h2');
@@ -74,8 +73,7 @@ const renderContent = (state, elements, i18n) => {
   });
 };
 
-const renderMessageForm = (state, elements) => {
-  const el = elements;
+const renderMessageForm = (state, el) => {
   if (state.valid) {
     el.feedbackForm.classList.remove('text-danger');
     el.feedbackForm.classList.add('text-success');
@@ -86,8 +84,7 @@ const renderMessageForm = (state, elements) => {
   }
 };
 
-const statusSwitch = (state, elements, i18n) => {
-  const el = elements;
+const statusSwitch = (state, el) => {
   const { status } = state.form;
   switch (status) {
     case 'sending':
@@ -107,11 +104,6 @@ const statusSwitch = (state, elements, i18n) => {
       el.input.classList.add('is-invalid');
       el.input.focus();
       break;
-    case 'rendering':
-      el.input.removeAttribute('readonly');
-      el.button.removeAttribute('disabled');
-      renderContent(state, el, i18n);
-      break;
     default:
       throw Error(`Unknown form status: ${status}`);
   }
@@ -120,13 +112,13 @@ const statusSwitch = (state, elements, i18n) => {
 export default (state, elements, i18n) => {
   const watcherFn = {
     'form.field': () => renderMessageForm(state.form.field, elements),
-    'form.status': () => statusSwitch(state, elements, i18n),
+    'form.status': () => statusSwitch(state, elements),
     posts: () => renderContent(state, elements, i18n),
   };
   const watchedState = onChange(state, (path) => {
-    if (watcherFn[path]) {
-      watcherFn[path]();
-    }
+    const simplePath = path.split('.')[0];
+    if (watcherFn[simplePath]) watcherFn[simplePath]();
+    if (watcherFn[path]) watcherFn[path]();
   });
   return watchedState;
 };
