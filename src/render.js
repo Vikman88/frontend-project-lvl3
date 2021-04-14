@@ -42,6 +42,7 @@ export default (state, elements, i18n) => {
     'form.field': () => renderMessageForm(state.form.field, elements),
     'form.status': () => statusSwitch(state, elements),
     posts: () => renderContent(state, elements, i18n),
+    currentId: () => renderContent(state, elements, i18n),
   };
   const watchedState = onChange(state, (path) => {
     const simplePath = path.split('.')[0];
