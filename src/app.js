@@ -126,7 +126,6 @@ export default () => {
           };
         }
         watchedState.form.status = 'failed';
-        watchedState.form.urls.pop();
       });
   });
 };
