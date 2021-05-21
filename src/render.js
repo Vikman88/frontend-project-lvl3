@@ -1,19 +1,19 @@
 import onChange from 'on-change';
 import renderContent from './renderContent.js';
 
-const renderMessageForm = (state, el) => {
-  if (state.valid) {
+const statusSwitch = (state, el, i18n) => {
+  const { valid, message } = state.form.feedback;
+  const { status } = state.form;
+
+  if (valid === 'true') {
     el.feedbackForm.classList.remove('text-danger');
     el.feedbackForm.classList.add('text-success');
-    el.feedbackForm.textContent = state.message;
+    el.feedbackForm.textContent = i18n.t(message);
   } else {
     el.feedbackForm.classList.add('text-danger');
-    el.feedbackForm.textContent = state.message;
+    el.feedbackForm.textContent = i18n.t(message);
   }
-};
 
-const statusSwitch = (state, el) => {
-  const { status } = state.form;
   switch (status) {
     case 'sending':
       el.input.setAttribute('readonly', true);
@@ -38,16 +38,21 @@ const statusSwitch = (state, el) => {
 };
 
 export default (state, elements, i18n) => {
-  const watcherFn = {
-    'form.field': () => renderMessageForm(state.form.field, elements),
-    'form.status': () => statusSwitch(state, elements),
-    posts: () => renderContent(state, elements, i18n),
-    currentId: () => renderContent(state, elements, i18n),
-  };
   const watchedState = onChange(state, (path) => {
     const simplePath = path.split('.')[0];
-    if (watcherFn[simplePath]) watcherFn[simplePath]();
-    if (watcherFn[path]) watcherFn[path]();
+    switch (simplePath) {
+      case 'form':
+        statusSwitch(state, elements, i18n);
+        break;
+      case 'posts':
+        renderContent(state, elements, i18n);
+        break;
+      case 'currentId':
+        renderContent(state, elements, i18n);
+        break;
+      default:
+        break;
+    }
   });
   return watchedState;
 };

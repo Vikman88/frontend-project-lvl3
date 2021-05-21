@@ -7,9 +7,7 @@ import getRequest from './sendRequest.js';
 import { toResponseXML } from './utils.js';
 import loadRss from './loadRSS.js';
 
-const variables = {
-  interval: () => 5000,
-};
+const interval = 5000;
 
 const alertPaths = {
   empty: () => 'form.messageAlert.empty',
@@ -31,11 +29,11 @@ export default () => {
     .then(() => {
       yup.setLocale({
         mixed: {
-          required: i18n.t(alertPaths.empty()),
-          notOneOf: i18n.t(alertPaths.dublicate()),
+          required: alertPaths.empty(),
+          notOneOf: alertPaths.dublicate(),
         },
         string: {
-          url: i18n.t(alertPaths.invalid()),
+          url: alertPaths.invalid(),
         },
       });
     });
@@ -55,12 +53,12 @@ export default () => {
   const state = {
     form: {
       status: 'filling',
-      urls: [],
-      field: {
+      feedback: {
         message: null,
-        valid: true,
+        valid: 'true',
       },
     },
+    urls: [],
     posts: [],
     currentId: null,
   };
@@ -70,61 +68,58 @@ export default () => {
   const { form } = elements;
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const listUrls = state.form.urls;
+    const listUrls = state.urls;
     const formData = new FormData(e.target);
     const responseUrl = formData.get('url');
     const message = validate(responseUrl, listUrls);
     if (message) {
-      watchedState.form.field = {
+      watchedState.form.feedback = {
         message,
-        valid: false,
+        valid: 'false',
       };
       return;
     }
-    watchedState.form.field = {
+    watchedState.form.feedback = {
       message,
-      valid: true,
+      valid: 'true',
     };
     watchedState.form.status = 'sending';
     getRequest(responseUrl)
       .then((response) => {
         const responseXML = toResponseXML(response);
-        const rss = responseXML.querySelector('rss');
-        if (!rss) throw new Error('Страница не найдена');
-        watchedState.form.urls.push(responseUrl);
-        watchedState.form.field = {
-          message: i18n.t(alertPaths.success()),
-          valid: true,
-        };
-        loadRss(responseXML, state, watchedState, elements);
+        const successful = loadRss(responseXML, state, watchedState, elements);
+        if (!successful) {
+          watchedState.form.feedback = {
+            message: alertPaths.invalidRssUrl(),
+            valid: 'false',
+          };
+        } else {
+          watchedState.urls.push(responseUrl);
+          watchedState.form.feedback = {
+            message: alertPaths.success(),
+            valid: 'true',
+          };
+        }
         watchedState.form.status = 'filling';
       })
       .then(() => {
         const eternal = () => {
-          const { urls } = state.form;
+          const { urls } = state;
           urls.forEach((url) => {
-            getRequest(url)
-              .then((response) => {
-                const responseXML = toResponseXML(response);
-                loadRss(responseXML, state, watchedState, elements);
-              });
+            getRequest(url).then((response) => {
+              const responseXML = toResponseXML(response);
+              loadRss(responseXML, state, watchedState, elements);
+            });
           });
-          setTimeout(eternal, variables.interval());
+          setTimeout(eternal, interval);
         };
-        setTimeout(eternal, variables.interval());
+        setTimeout(eternal, interval);
       })
-      .catch((errors) => {
-        if (errors.message === 'Страница не найдена') {
-          watchedState.form.field = {
-            message: i18n.t(alertPaths.invalidRssUrl()),
-            valid: false,
-          };
-        } else {
-          watchedState.form.field = {
-            message: i18n.t(alertPaths.networkError()),
-            valid: false,
-          };
-        }
+      .catch(() => {
+        watchedState.form.feedback = {
+          message: alertPaths.networkError(),
+          valid: 'false',
+        };
         watchedState.form.status = 'failed';
       });
   });
