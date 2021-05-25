@@ -41,7 +41,7 @@ const renderFields = (items, el, i18n, currentId) => items.reduce((acc, item) =>
   a.textContent = item.title;
   liItems.append(a, button);
   return [...acc, liItems];
-  }, []);
+}, []);
 
 const renderContent = (state, el, i18n) => {
   const { posts, currentId } = state;
@@ -66,8 +66,8 @@ const renderContent = (state, el, i18n) => {
     p.textContent = post.description;
     li.append(h3, p);
     ulFeeds.prepend(li);
-    const postsField = renderFields(post.items, el, i18n, currentId);
-    ulPosts.prepend(...postsField);
+    const view = renderFields(post.items, el, i18n, currentId);
+    ulPosts.prepend(...view);
   });
 };
 

@@ -77,5 +77,5 @@ export {
   parsData,
   updateCollection,
   touchElements,
-  addMeta
+  addMeta,
 };
