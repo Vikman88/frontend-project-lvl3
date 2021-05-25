@@ -38,7 +38,7 @@ const statusSwitch = (state, el, i18n) => {
 };
 
 export default (state, elements, i18n) => {
-  const watchedState = onChange(state, (path) => {
+  const view = onChange(state, (path) => {
     const simplePath = path.split('.')[0];
     switch (simplePath) {
       case 'form':
@@ -54,5 +54,5 @@ export default (state, elements, i18n) => {
         break;
     }
   });
-  return watchedState;
+  return view;
 };

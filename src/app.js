@@ -63,7 +63,7 @@ export default () => {
         currentId: null,
       };
 
-      const watchedState = render(state, elements, i18n);
+      const view = render(state, elements, i18n);
 
       const { form } = elements;
       form.addEventListener('submit', (e) => {
@@ -73,33 +73,33 @@ export default () => {
         const responseUrl = formData.get('url');
         const message = validate(responseUrl, listUrls);
         if (message) {
-          watchedState.form.feedback = {
+          view.form.feedback = {
             message,
             valid: 'false',
           };
           return;
         }
-        watchedState.form.feedback = {
+        view.form.feedback = {
           message,
           valid: 'true',
         };
-        watchedState.form.status = 'sending';
+        view.form.status = 'sending';
         getRequest(responseUrl)
           .then((response) => {
-            createRSSFields(response, state, watchedState, elements);
-            watchedState.urls.push(responseUrl);
-            watchedState.form.feedback = {
+            createRSSFields(response, state, view, elements);
+            view.urls.push(responseUrl);
+            view.form.feedback = {
               message: alertPaths.success(),
               valid: 'true',
             };
-            watchedState.form.status = 'filling';
+            view.form.status = 'filling';
           })
           .then(() => {
             const eternal = () => {
               const { urls } = state;
               urls.forEach((url) => {
                 getRequest(url).then((response) => {
-                  createRSSFields(response, state, watchedState, elements);
+                  createRSSFields(response, state, view, elements);
                 });
               });
               setTimeout(eternal, interval);
@@ -108,17 +108,17 @@ export default () => {
           })
           .catch((error) => {
             if (error.message === 'parsererror') {
-              watchedState.form.feedback = {
+              view.form.feedback = {
                 message: alertPaths.invalidRssUrl(),
                 valid: 'false',
               };
             } else {
-              watchedState.form.feedback = {
+              view.form.feedback = {
                 message: alertPaths.networkError(),
                 valid: 'false',
               };
             }
-            watchedState.form.status = 'failed';
+            view.form.status = 'failed';
           });
       });
     });

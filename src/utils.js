@@ -24,10 +24,10 @@ const parsData = (data) => {
   return result;
 };
 
-const setId = (watchedState) => (el) => {
+const setId = (view) => (el) => {
   if (!el.id) {
-    watchedState.incId += 1;
-    el.id = watchedState.incId;
+    view.incId += 1;
+    el.id = view.incId;
   }
   if (typeof el.touched === 'undefined') {
     el.touched = false;
@@ -35,9 +35,9 @@ const setId = (watchedState) => (el) => {
   return el;
 };
 
-const addMeta = (postsState, watchedState) => {
+const addMeta = (postsState, view) => {
   const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(watchedState));
+    const newPosts = data.items.map(setId(view));
     data.items = newPosts;
     return data;
   });
@@ -72,4 +72,10 @@ const touchElements = (collection, currentId) => {
   });
 };
 
-export { toResponseXML, parsData, updateCollection, touchElements, addMeta };
+export {
+  toResponseXML,
+  parsData,
+  updateCollection,
+  touchElements,
+  addMeta
+};

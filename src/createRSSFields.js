@@ -6,17 +6,17 @@ import {
   touchElements,
 } from './utils.js';
 
-const createRSSFields = (response, state, watchedState, elements) => {
+const createRSSFields = (response, state, view, elements) => {
   const responseXML = toResponseXML(response);
   const parsedPosts = parsData(responseXML);
   const posts = updateCollection(parsedPosts, state.posts);
-  const mergedPosts = addMeta(posts, watchedState);
-  watchedState.posts = mergedPosts;
+  const mergedPosts = addMeta(posts, view);
+  view.posts = mergedPosts;
   elements.postsField.addEventListener('click', (val) => {
     const { target } = val;
     const { id } = target.dataset;
-    watchedState.currentId = id;
-    touchElements(watchedState.posts, id);
+    view.currentId = id;
+    touchElements(view.posts, id);
   });
 };
 
