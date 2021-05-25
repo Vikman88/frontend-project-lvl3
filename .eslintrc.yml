@@ -2,6 +2,7 @@ root: true
 
 plugins:
   - babel
+  - prettier
 
 env:
   node: true
@@ -11,8 +12,10 @@ parser: babel-eslint
 
 extends:
   - 'airbnb-base'
+  - 'prettier'
 
 rules:
+  prettier/prettier: 0
   no-console: 0
   import/extensions: 0
   no-param-reassign: 0
