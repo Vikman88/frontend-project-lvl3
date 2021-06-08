@@ -1,14 +1,12 @@
 import {
   composeResponseToXML,
-  parsingData,
   addMeta,
   updateCollection,
   touchElement,
 } from './utils.js';
 
 const createRSSFields = (response, state, view, elements) => {
-  const responseXML = composeResponseToXML(response);
-  const parsedPosts = parsingData(responseXML);
+  const parsedPosts = composeResponseToXML(response);
   const posts = updateCollection(parsedPosts, state.posts);
   const mergedPosts = addMeta(posts, view);
   view.posts = mergedPosts;
