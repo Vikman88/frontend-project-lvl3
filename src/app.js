@@ -8,15 +8,6 @@ import createRSSFields from './createRSSFields.js';
 
 const interval = 5000;
 
-const alertPaths = {
-  empty: () => 'form.messageAlert.empty',
-  invalid: () => 'form.messageAlert.invalid',
-  dublicate: () => 'form.messageAlert.dublicate',
-  invalidRssUrl: () => 'networkAlert.invalidRssUrl',
-  networkError: () => 'networkAlert.networkError',
-  success: () => 'networkAlert.success',
-};
-
 export default () => {
   const i18n = i18next.createInstance();
   i18n
@@ -28,11 +19,13 @@ export default () => {
     .then(() => {
       yup.setLocale({
         mixed: {
-          required: alertPaths.empty(),
-          notOneOf: alertPaths.dublicate(),
+          required: () => ({ key: 'form.messageAlert.empty' }),
+          notOneOf: () => ({ key: 'form.messageAlert.dublicate' }),
         },
+
         string: {
-          url: alertPaths.invalid(),
+          max: ({ max }) => ({ key: 'form.messageAlert.big', values: { max } }),
+          url: () => ({ key: 'form.messageAlert.invalid' }),
         },
       });
     })
@@ -54,7 +47,7 @@ export default () => {
           status: 'filling',
           feedback: {
             message: null,
-            valid: 'true',
+            statusForm: 'valid',
           },
         },
         urls: [],
@@ -75,13 +68,13 @@ export default () => {
         if (message) {
           view.form.feedback = {
             message,
-            valid: 'false',
+            statusForm: 'invalid',
           };
           return;
         }
         view.form.feedback = {
           message,
-          valid: 'true',
+          statusForm: 'valid',
         };
         view.form.status = 'sending';
         fetchData(responseUrl)
@@ -89,8 +82,8 @@ export default () => {
             createRSSFields(response, state, view, elements);
             view.urls.push(responseUrl);
             view.form.feedback = {
-              message: alertPaths.success(),
-              valid: 'true',
+              message: 'networkAlert.success',
+              statusForm: 'valid',
             };
             view.form.status = 'filling';
           })
@@ -109,13 +102,13 @@ export default () => {
           .catch((error) => {
             if (error.message === 'parsererror') {
               view.form.feedback = {
-                message: alertPaths.invalidRssUrl(),
-                valid: 'false',
+                message: 'networkAlert.invalidRssUrl',
+                statusForm: 'invalid',
               };
             } else {
               view.form.feedback = {
-                message: alertPaths.networkError(),
-                valid: 'false',
+                message: 'networkAlert.networkError',
+                statusForm: 'invalid',
               };
             }
             view.form.status = 'failed';

@@ -1,7 +1,7 @@
 const contentPaths = {
-  button: () => 'field.posts.button',
-  feeds: () => 'field.feeds.header',
-  field: () => 'field.posts.header',
+  button: 'field.posts.button',
+  feeds: 'field.feeds.header',
+  field: 'field.posts.header',
 };
 
 const createEl = (el) => document.createElement(`${el}`);
@@ -22,7 +22,7 @@ const renderFields = (items, el, i18n, currentId) => items.reduce((acc, item) =>
   button.classList.add('btn', 'btn-primary', 'btn-sm');
   button.setAttribute('data-toggle', 'modal');
   button.setAttribute('data-target', '#modal');
-  button.textContent = i18n.t(contentPaths.button());
+  button.textContent = i18n.t(contentPaths.button);
   button.setAttribute('data-id', item.id);
   liItems.classList.add(
     'list-group-item',
@@ -49,8 +49,8 @@ const renderContent = (state, el, i18n) => {
   el.postsField.innerHTML = '';
   const h2Feeds = createEl('h2');
   const h2Posts = createEl('h2');
-  h2Feeds.textContent = i18n.t(contentPaths.feeds());
-  h2Posts.textContent = i18n.t(contentPaths.field());
+  h2Feeds.textContent = i18n.t(contentPaths.feeds);
+  h2Posts.textContent = i18n.t(contentPaths.field);
   const ulFeeds = createEl('ul');
   const ulPosts = createEl('ul');
   ulFeeds.classList.add('list-group', 'mb-5');

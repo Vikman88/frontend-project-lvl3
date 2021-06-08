@@ -5,6 +5,7 @@ export default {
         empty: 'Поле не заполнено',
         invalid: 'Ссылка должна быть валидным URL',
         dublicate: 'RSS уже существует',
+        big: 'Ссылка содержит более 1000 символов',
       },
     },
     networkAlert: {

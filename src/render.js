@@ -2,10 +2,10 @@ import onChange from 'on-change';
 import renderContent from './renderContent.js';
 
 const statusSwitch = (state, el, i18n) => {
-  const { valid, message } = state.form.feedback;
+  const { statusForm, message } = state.form.feedback;
   const { status } = state.form;
 
-  if (valid === 'true') {
+  if (statusForm === 'valid') {
     el.feedbackForm.classList.remove('text-danger');
     el.feedbackForm.classList.add('text-success');
     el.feedbackForm.textContent = i18n.t(message);
