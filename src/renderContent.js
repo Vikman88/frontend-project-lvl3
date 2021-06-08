@@ -33,7 +33,7 @@ const renderFields = (items, el, i18n, currentId) => items.reduce((acc, item) =>
   const a = createEl('a');
   a.href = item.link;
   if (item.touched) a.classList.add('font-weight-normal');
-  else a.classList.add('font-weight-bold');
+  else a.classList.add('fw-bold');
   if (item.id === parseInt(currentId, 10)) buildModalWindow(item, el);
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
