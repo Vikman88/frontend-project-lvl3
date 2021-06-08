@@ -1,14 +1,14 @@
 import {
-  toResponseXML,
-  parsData,
+  composeResponseToXML,
+  parsingData,
   addMeta,
   updateCollection,
-  touchElements,
+  touchElement,
 } from './utils.js';
 
 const createRSSFields = (response, state, view, elements) => {
-  const responseXML = toResponseXML(response);
-  const parsedPosts = parsData(responseXML);
+  const responseXML = composeResponseToXML(response);
+  const parsedPosts = parsingData(responseXML);
   const posts = updateCollection(parsedPosts, state.posts);
   const mergedPosts = addMeta(posts, view);
   view.posts = mergedPosts;
@@ -16,7 +16,7 @@ const createRSSFields = (response, state, view, elements) => {
     const { target } = val;
     const { id } = target.dataset;
     view.currentId = id;
-    touchElements(view.posts, id);
+    touchElement(view.posts, id);
   });
 };
 

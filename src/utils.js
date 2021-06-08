@@ -1,4 +1,4 @@
-const toResponseXML = (response) => {
+const composeResponseToXML = (response) => {
   const parserXML = new DOMParser();
   const xmlContent = response.data.contents;
   const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
@@ -6,7 +6,7 @@ const toResponseXML = (response) => {
   return responseXML;
 };
 
-const parsData = (data) => {
+const parsingData = (data) => {
   const title = data.querySelector('title').textContent;
   const link = data.querySelector('link').textContent;
   const description = data.querySelector('description').textContent;
@@ -18,7 +18,7 @@ const parsData = (data) => {
 
   const itemsCollection = data.querySelectorAll('item');
   if (itemsCollection.length) {
-    const items = Array.from(itemsCollection).map(parsData);
+    const items = Array.from(itemsCollection).map(parsingData);
     return { ...result, items };
   }
   return result;
@@ -62,7 +62,7 @@ const updateCollection = (responseRSS, loadedRSS) => {
   return newState;
 };
 
-const touchElements = (collection, currentId) => {
+const touchElement = (collection, currentId) => {
   collection.forEach((feed) => {
     feed.items.forEach((post) => {
       const { id } = post;
@@ -73,9 +73,9 @@ const touchElements = (collection, currentId) => {
 };
 
 export {
-  toResponseXML,
-  parsData,
+  composeResponseToXML,
+  parsingData,
   updateCollection,
-  touchElements,
+  touchElement,
   addMeta,
 };

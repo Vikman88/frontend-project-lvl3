@@ -3,7 +3,7 @@ import i18next from 'i18next';
 import render from './render.js';
 import resources from './locales';
 import validate from './validator.js';
-import getRequest from './sendRequest.js';
+import fetchData from './fetchData.js';
 import createRSSFields from './createRSSFields.js';
 
 const interval = 5000;
@@ -84,7 +84,7 @@ export default () => {
           valid: 'true',
         };
         view.form.status = 'sending';
-        getRequest(responseUrl)
+        fetchData(responseUrl)
           .then((response) => {
             createRSSFields(response, state, view, elements);
             view.urls.push(responseUrl);
@@ -98,7 +98,7 @@ export default () => {
             const eternal = () => {
               const { urls } = state;
               urls.forEach((url) => {
-                getRequest(url).then((response) => {
+                fetchData(url).then((response) => {
                   createRSSFields(response, state, view, elements);
                 });
               });
