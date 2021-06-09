@@ -46,7 +46,7 @@ const renderFields = (items, i18n) => items.reduce((acc, item) => {
   const a = createEl('a');
   a.href = item.link;
   if (item.touched) a.classList.add('font-weight-normal');
-  else a.classList.add('font-weight-bold');
+  else a.classList.add('fw-bold');
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
   a.setAttribute('data-id', item.id);
