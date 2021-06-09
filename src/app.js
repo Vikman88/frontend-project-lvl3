@@ -54,6 +54,7 @@ export default () => {
         posts: [],
         incId: 0,
         currentId: null,
+        currentItem: null,
       };
 
       const view = render(state, elements, i18n);

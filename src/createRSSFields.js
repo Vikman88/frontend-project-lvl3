@@ -1,11 +1,15 @@
 import parsingData from './parsingData.js';
 
-const touchElement = (collection, currentId) => {
-  collection.forEach((feed) => {
+const touchElement = (state, currentId) => {
+  const { posts } = state;
+  posts.forEach((feed) => {
     feed.items.forEach((post) => {
       const { id } = post;
       const item = post;
-      if (id === parseInt(currentId, 10)) item.touched = true;
+      if (id === parseInt(currentId, 10)) {
+        item.touched = true;
+        state.currentItem = item;
+      }
     });
   });
 };
@@ -56,8 +60,8 @@ const createRSSFields = (response, state, view, elements) => {
   elements.postsField.addEventListener('click', (val) => {
     const { target } = val;
     const { id } = target.dataset;
+    touchElement(view, id);
     view.currentId = id;
-    touchElement(view.posts, id);
   });
 };
 
