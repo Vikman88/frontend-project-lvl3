@@ -28,7 +28,7 @@ const buildModalWindow = (state, el) => {
   modalLink.querySelector('a').href = currentContent.link;
 };
 
-const renderFields = (items, i18n) => items.reduce((acc, item) => {
+const createFields = (items, i18n) => items.reduce((acc, item) => {
   const liItem = createEl('li');
   const button = createEl('button');
   button.type = 'button';
@@ -43,15 +43,15 @@ const renderFields = (items, i18n) => items.reduce((acc, item) => {
     'justify-content-between',
     'align-items-start',
   );
-  const a = createEl('a');
-  a.href = item.link;
-  if (item.touched) a.classList.add('font-weight-normal');
-  else a.classList.add('fw-bold');
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.setAttribute('data-id', item.id);
-  a.textContent = item.title;
-  liItem.append(a, button);
+  const aEl = createEl('a');
+  aEl.href = item.link;
+  if (item.touched) aEl.classList.add('font-weight-normal');
+  else aEl.classList.add('fw-bold');
+  aEl.target = '_blank';
+  aEl.rel = 'noopener noreferrer';
+  aEl.setAttribute('data-id', item.id);
+  aEl.textContent = item.title;
+  liItem.append(aEl, button);
   return [...acc, liItem];
 }, []);
 
@@ -74,12 +74,12 @@ const renderContent = (state, el, i18n) => {
     li.classList.add('list-group-item');
     const h3 = createEl('h3');
     h3.textContent = post.title;
-    const p = createEl('p');
-    p.textContent = post.description;
-    li.append(h3, p);
+    const pEl = createEl('p');
+    pEl.textContent = post.description;
+    li.append(h3, pEl);
     ulFeed.prepend(li);
-    const view = renderFields(post.items, i18n);
-    ulPost.prepend(...view);
+    const dataFields = createFields(post.items, i18n);
+    ulPost.prepend(...dataFields);
   });
 };
 
@@ -120,8 +120,7 @@ const switchStatus = (state, el, i18n) => {
 };
 
 export default (state, elements, i18n) => {
-  const view = onChange(state, (path, value) => {
-    console.log(path, value);
+  const view = onChange(state, (path) => {
     const simplePath = path.split('.')[0];
     switch (simplePath) {
       case 'form':

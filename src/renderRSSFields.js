@@ -14,10 +14,10 @@ const touchElement = (state, currentId) => {
   });
 };
 
-const setId = (view) => (el) => {
+const setId = (watchedState) => (el) => {
   if (!el.id) {
-    view.incId += 1;
-    el.id = view.incId;
+    watchedState.incId += 1;
+    el.id = watchedState.incId;
   }
   if (typeof el.touched === 'undefined') {
     el.touched = false;
@@ -25,9 +25,9 @@ const setId = (view) => (el) => {
   return el;
 };
 
-const addMeta = (postsState, view) => {
+const addMeta = (postsState, watchedState) => {
   const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(view));
+    const newPosts = data.items.map(setId(watchedState));
     data.items = newPosts;
     return data;
   });
@@ -52,17 +52,17 @@ const updateCollection = (responseRSS, loadedRSS) => {
   return newState;
 };
 
-const createRSSFields = (response, state, view, elements) => {
+const renderRSSFields = (response, loadedPosts, watchedState, elements) => {
   const parsedPosts = parsingData(response);
-  const posts = updateCollection(parsedPosts, state.posts);
-  const mergedPosts = addMeta(posts, view);
-  view.posts = mergedPosts;
+  const posts = updateCollection(parsedPosts, loadedPosts);
+  const mergedPosts = addMeta(posts, watchedState);
+  watchedState.posts = mergedPosts;
   elements.postsField.addEventListener('click', (val) => {
     const { target } = val;
     const { id } = target.dataset;
-    touchElement(view, id);
-    view.currentId = id;
+    touchElement(watchedState, id);
+    watchedState.currentId = id;
   });
 };
 
-export default createRSSFields;
+export default renderRSSFields;

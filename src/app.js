@@ -4,7 +4,7 @@ import render from './render.js';
 import resources from './locales';
 import validate from './validator.js';
 import fetchData from './fetchData.js';
-import createRSSFields from './createRSSFields.js';
+import renderRSSFields from './renderRSSFields.js';
 
 const interval = 5000;
 
@@ -57,7 +57,7 @@ export default () => {
         currentItem: null,
       };
 
-      const view = render(state, elements, i18n);
+      const watchedState = render(state, elements, i18n);
 
       const { form } = elements;
       form.addEventListener('submit', (e) => {
@@ -67,33 +67,35 @@ export default () => {
         const responseUrl = formData.get('url');
         const message = validate(responseUrl, listUrls);
         if (message) {
-          view.form.feedback = {
+          watchedState.form.feedback = {
             message,
             statusForm: 'invalid',
           };
           return;
         }
-        view.form.feedback = {
+        watchedState.form.feedback = {
           message,
           statusForm: 'valid',
         };
-        view.form.status = 'sending';
+        watchedState.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
-            createRSSFields(response, state, view, elements);
-            view.urls.push(responseUrl);
-            view.form.feedback = {
+            const { posts } = state;
+            renderRSSFields(response, posts, watchedState, elements);
+            watchedState.urls.push(responseUrl);
+            watchedState.form.feedback = {
               message: 'networkAlert.success',
               statusForm: 'valid',
             };
-            view.form.status = 'filling';
+            watchedState.form.status = 'filling';
           })
           .then(() => {
             const eternal = () => {
               const { urls } = state;
               urls.forEach((url) => {
                 fetchData(url).then((response) => {
-                  createRSSFields(response, state, view, elements);
+                  const { posts } = state;
+                  renderRSSFields(response, posts, watchedState, elements);
                 });
               });
               setTimeout(eternal, interval);
@@ -102,17 +104,17 @@ export default () => {
           })
           .catch((error) => {
             if (error.message === 'parsererror') {
-              view.form.feedback = {
+              watchedState.form.feedback = {
                 message: 'networkAlert.invalidRssUrl',
                 statusForm: 'invalid',
               };
             } else {
-              view.form.feedback = {
+              watchedState.form.feedback = {
                 message: 'networkAlert.networkError',
                 statusForm: 'invalid',
               };
             }
-            view.form.status = 'failed';
+            watchedState.form.status = 'failed';
           });
       });
     });
