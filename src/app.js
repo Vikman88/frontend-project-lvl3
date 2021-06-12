@@ -9,8 +9,8 @@ import parsingData from './parsingData.js';
 
 const interval = 5000;
 
-const touchElement = (viewer, currentId) => {
-  const { posts } = viewer.uiState;
+const touchElement = (view, currentId) => {
+  const { posts } = view.uiState;
   posts.forEach((post) => {
     const { postId } = post;
     const item = post;
@@ -20,11 +20,11 @@ const touchElement = (viewer, currentId) => {
   });
 };
 
-const setId = (viewer) => (el) => {
+const setId = (view) => (el) => {
   if (!el.id) {
     const id = _.uniqueId();
     el.id = id;
-    viewer.uiState.posts.push({ postId: id, visibility: 'hidden' });
+    view.uiState.posts.push({ postId: id, visibility: 'hidden' });
   }
   /* if (_.isUndefined(el.touched)) {
     el.touched = false;
@@ -32,9 +32,9 @@ const setId = (viewer) => (el) => {
   return el;
 };
 
-const addMetaData = (postsState, viewer) => {
+const addMetaData = (postsState, view) => {
   const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(viewer));
+    const newPosts = data.items.map(setId(view));
     data.items = newPosts;
     return data;
   });
@@ -110,14 +110,14 @@ export default () => {
         },
       };
 
-      const viewer = render(state, elements, i18n);
+      const view = render(state, elements, i18n);
 
       elements.postsField.addEventListener('click', (value) => {
         const { target } = value;
         const { id } = target.dataset;
         if (!_.isUndefined(id)) {
-          touchElement(viewer, id);
-          viewer.uiState.currentId = id;
+          touchElement(view, id);
+          view.uiState.currentId = id;
         }
       });
 
@@ -129,30 +129,30 @@ export default () => {
         const responseUrl = formData.get('url');
         const message = validate(responseUrl, listUrls);
         if (message) {
-          viewer.form.feedback = {
+          view.form.feedback = {
             message,
             statusForm: 'invalid',
           };
           return;
         }
-        viewer.form.feedback = {
+        view.form.feedback = {
           message,
           statusForm: 'valid',
         };
-        viewer.form.status = 'sending';
+        view.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
             const { posts } = state;
             const parsedPosts = parsingData(response);
             const updatedPosts = updateCollection(parsedPosts, posts);
-            const composedPosts = addMetaData(updatedPosts, viewer);
-            viewer.posts = composedPosts;
-            viewer.urls.push(responseUrl);
-            viewer.form.feedback = {
+            const composedPosts = addMetaData(updatedPosts, view);
+            view.posts = composedPosts;
+            view.urls.push(responseUrl);
+            view.form.feedback = {
               message: 'networkAlert.success',
               statusForm: 'valid',
             };
-            viewer.form.status = 'filling';
+            view.form.status = 'filling';
           })
           .then(() => {
             const eternal = () => {
@@ -162,8 +162,8 @@ export default () => {
                   const { posts } = state;
                   const parsedPosts = parsingData(response);
                   const updatedPosts = updateCollection(parsedPosts, posts);
-                  const composedPosts = addMetaData(updatedPosts, viewer);
-                  viewer.posts = composedPosts;
+                  const composedPosts = addMetaData(updatedPosts, view);
+                  view.posts = composedPosts;
                 });
               });
               setTimeout(eternal, interval);
@@ -172,17 +172,17 @@ export default () => {
           })
           .catch((error) => {
             if (error.message === 'parsererror') {
-              viewer.form.feedback = {
+              view.form.feedback = {
                 message: 'networkAlert.invalidRssUrl',
                 statusForm: 'invalid',
               };
             } else {
-              viewer.form.feedback = {
+              view.form.feedback = {
                 message: 'networkAlert.networkError',
                 statusForm: 'invalid',
               };
             }
-            viewer.form.status = 'failed';
+            view.form.status = 'failed';
           });
       });
     });
