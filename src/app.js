@@ -9,8 +9,8 @@ import parsingData from './parsingData.js';
 
 const interval = 5000;
 
-const touchElement = (viewState, currentId) => {
-  const { posts } = viewState.uiState;
+const touchElement = (viewer, currentId) => {
+  const { posts } = viewer.uiState;
   posts.forEach((post) => {
     const { postId } = post;
     const item = post;
@@ -20,11 +20,11 @@ const touchElement = (viewState, currentId) => {
   });
 };
 
-const setId = (viewState) => (el) => {
+const setId = (viewer) => (el) => {
   if (!el.id) {
     const id = _.uniqueId();
     el.id = id;
-    viewState.uiState.posts.push({ postId: id, visibility: 'hidden' });
+    viewer.uiState.posts.push({ postId: id, visibility: 'hidden' });
   }
   /* if (_.isUndefined(el.touched)) {
     el.touched = false;
@@ -32,9 +32,9 @@ const setId = (viewState) => (el) => {
   return el;
 };
 
-const addMetaData = (postsState, viewState) => {
+const addMetaData = (postsState, viewer) => {
   const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(viewState));
+    const newPosts = data.items.map(setId(viewer));
     data.items = newPosts;
     return data;
   });
@@ -110,14 +110,14 @@ export default () => {
         },
       };
 
-      const viewState = render(state, elements, i18n);
+      const viewer = render(state, elements, i18n);
 
       elements.postsField.addEventListener('click', (value) => {
         const { target } = value;
         const { id } = target.dataset;
         if (!_.isUndefined(id)) {
-          touchElement(viewState, id);
-          viewState.uiState.currentId = id;
+          touchElement(viewer, id);
+          viewer.uiState.currentId = id;
         }
       });
 
@@ -129,30 +129,30 @@ export default () => {
         const responseUrl = formData.get('url');
         const message = validate(responseUrl, listUrls);
         if (message) {
-          viewState.form.feedback = {
+          viewer.form.feedback = {
             message,
             statusForm: 'invalid',
           };
           return;
         }
-        viewState.form.feedback = {
+        viewer.form.feedback = {
           message,
           statusForm: 'valid',
         };
-        viewState.form.status = 'sending';
+        viewer.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
             const { posts } = state;
             const parsedPosts = parsingData(response);
             const updatedPosts = updateCollection(parsedPosts, posts);
-            const composedPosts = addMetaData(updatedPosts, viewState);
-            viewState.posts = composedPosts;
-            viewState.urls.push(responseUrl);
-            viewState.form.feedback = {
+            const composedPosts = addMetaData(updatedPosts, viewer);
+            viewer.posts = composedPosts;
+            viewer.urls.push(responseUrl);
+            viewer.form.feedback = {
               message: 'networkAlert.success',
               statusForm: 'valid',
             };
-            viewState.form.status = 'filling';
+            viewer.form.status = 'filling';
           })
           .then(() => {
             const eternal = () => {
@@ -162,8 +162,8 @@ export default () => {
                   const { posts } = state;
                   const parsedPosts = parsingData(response);
                   const updatedPosts = updateCollection(parsedPosts, posts);
-                  const composedPosts = addMetaData(updatedPosts, viewState);
-                  viewState.posts = composedPosts;
+                  const composedPosts = addMetaData(updatedPosts, viewer);
+                  viewer.posts = composedPosts;
                 });
               });
               setTimeout(eternal, interval);
@@ -172,17 +172,17 @@ export default () => {
           })
           .catch((error) => {
             if (error.message === 'parsererror') {
-              viewState.form.feedback = {
+              viewer.form.feedback = {
                 message: 'networkAlert.invalidRssUrl',
                 statusForm: 'invalid',
               };
             } else {
-              viewState.form.feedback = {
+              viewer.form.feedback = {
                 message: 'networkAlert.networkError',
                 statusForm: 'invalid',
               };
             }
-            viewState.form.status = 'failed';
+            viewer.form.status = 'failed';
           });
       });
     });
