@@ -1,12 +1,64 @@
 import * as yup from 'yup';
 import i18next from 'i18next';
+import _ from 'lodash';
 import render from './render.js';
 import resources from './locales';
 import validate from './validator.js';
 import fetchData from './fetchData.js';
-import renderRSSFields from './renderRSSFields.js';
+import parsingData from './parsingData.js';
 
 const interval = 5000;
+
+const touchElement = (watchedState, currentId) => {
+  const { posts } = watchedState.uiState;
+  posts.forEach((post) => {
+    const { postId } = post;
+    const item = post;
+    if (postId === currentId) {
+      item.visibility = 'shown';
+    }
+  });
+};
+
+const setId = (watchedState) => (el) => {
+  if (!el.id) {
+    const id = _.uniqueId();
+    el.id = id;
+    watchedState.uiState.posts.push({ postId: id, visibility: 'hidden' });
+  }
+  /* if (_.isUndefined(el.touched)) {
+    el.touched = false;
+  } */
+  return el;
+};
+
+const addMetaData = (postsState, watchedState) => {
+  const state = postsState.map((data) => {
+    const newPosts = data.items.map(setId(watchedState));
+    data.items = newPosts;
+    return data;
+  });
+  return state;
+};
+
+const updateCollection = (responseRSS, loadedRSS) => {
+  const mergedPosts = loadedRSS;
+  const loadedlinks = mergedPosts.map(({ link }) => link);
+  if (loadedlinks.includes(responseRSS.link)) {
+    const index = loadedlinks.indexOf(responseRSS.link);
+    const currentLoadedItems = mergedPosts[index].items;
+    /* const currentLoadedLinks = currentLoadedItems.map(({ link }) => link); */
+    const targetItems = responseRSS.items;
+    const newItems = _.differenceBy(targetItems, currentLoadedItems, 'link');
+    /* const newItems = targetItems.reduce((acc, v) => {
+      const currentLink = v.link;
+      if (!currentLoadedLinks.includes(currentLink)) acc.push(v);
+      return acc;
+    }, []); */
+    mergedPosts[index].items.unshift(...newItems);
+  } else mergedPosts.push(responseRSS);
+  return mergedPosts;
+};
 
 export default () => {
   const i18n = i18next.createInstance();
@@ -52,12 +104,22 @@ export default () => {
         },
         urls: [],
         posts: [],
-        incId: 0,
-        currentId: null,
-        currentItem: null,
+        uiState: {
+          posts: [],
+          currentId: null,
+        },
       };
 
       const watchedState = render(state, elements, i18n);
+
+      elements.postsField.addEventListener('click', (value) => {
+        const { target } = value;
+        const { id } = target.dataset;
+        if (!_.isUndefined(id)) {
+          touchElement(watchedState, id);
+          watchedState.uiState.currentId = id;
+        }
+      });
 
       const { form } = elements;
       form.addEventListener('submit', (e) => {
@@ -81,7 +143,10 @@ export default () => {
         fetchData(responseUrl)
           .then((response) => {
             const { posts } = state;
-            renderRSSFields(response, posts, watchedState, elements);
+            const parsedPosts = parsingData(response);
+            const updatedPosts = updateCollection(parsedPosts, posts);
+            const composedPosts = addMetaData(updatedPosts, watchedState);
+            watchedState.posts = composedPosts;
             watchedState.urls.push(responseUrl);
             watchedState.form.feedback = {
               message: 'networkAlert.success',
@@ -95,7 +160,10 @@ export default () => {
               urls.forEach((url) => {
                 fetchData(url).then((response) => {
                   const { posts } = state;
-                  renderRSSFields(response, posts, watchedState, elements);
+                  const parsedPosts = parsingData(response);
+                  const updatedPosts = updateCollection(parsedPosts, posts);
+                  const composedPosts = addMetaData(updatedPosts, watchedState);
+                  watchedState.posts = composedPosts;
                 });
               });
               setTimeout(eternal, interval);
