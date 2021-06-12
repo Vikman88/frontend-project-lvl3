@@ -9,8 +9,8 @@ import parsingData from './parsingData.js';
 
 const interval = 5000;
 
-const touchElement = (watchedState, currentId) => {
-  const { posts } = watchedState.uiState;
+const touchElement = (viewState, currentId) => {
+  const { posts } = viewState.uiState;
   posts.forEach((post) => {
     const { postId } = post;
     const item = post;
@@ -20,11 +20,11 @@ const touchElement = (watchedState, currentId) => {
   });
 };
 
-const setId = (watchedState) => (el) => {
+const setId = (viewState) => (el) => {
   if (!el.id) {
     const id = _.uniqueId();
     el.id = id;
-    watchedState.uiState.posts.push({ postId: id, visibility: 'hidden' });
+    viewState.uiState.posts.push({ postId: id, visibility: 'hidden' });
   }
   /* if (_.isUndefined(el.touched)) {
     el.touched = false;
@@ -32,9 +32,9 @@ const setId = (watchedState) => (el) => {
   return el;
 };
 
-const addMetaData = (postsState, watchedState) => {
+const addMetaData = (postsState, viewState) => {
   const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(watchedState));
+    const newPosts = data.items.map(setId(viewState));
     data.items = newPosts;
     return data;
   });
@@ -110,14 +110,14 @@ export default () => {
         },
       };
 
-      const watchedState = render(state, elements, i18n);
+      const viewState = render(state, elements, i18n);
 
       elements.postsField.addEventListener('click', (value) => {
         const { target } = value;
         const { id } = target.dataset;
         if (!_.isUndefined(id)) {
-          touchElement(watchedState, id);
-          watchedState.uiState.currentId = id;
+          touchElement(viewState, id);
+          viewState.uiState.currentId = id;
         }
       });
 
@@ -129,30 +129,30 @@ export default () => {
         const responseUrl = formData.get('url');
         const message = validate(responseUrl, listUrls);
         if (message) {
-          watchedState.form.feedback = {
+          viewState.form.feedback = {
             message,
             statusForm: 'invalid',
           };
           return;
         }
-        watchedState.form.feedback = {
+        viewState.form.feedback = {
           message,
           statusForm: 'valid',
         };
-        watchedState.form.status = 'sending';
+        viewState.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
             const { posts } = state;
             const parsedPosts = parsingData(response);
             const updatedPosts = updateCollection(parsedPosts, posts);
-            const composedPosts = addMetaData(updatedPosts, watchedState);
-            watchedState.posts = composedPosts;
-            watchedState.urls.push(responseUrl);
-            watchedState.form.feedback = {
+            const composedPosts = addMetaData(updatedPosts, viewState);
+            viewState.posts = composedPosts;
+            viewState.urls.push(responseUrl);
+            viewState.form.feedback = {
               message: 'networkAlert.success',
               statusForm: 'valid',
             };
-            watchedState.form.status = 'filling';
+            viewState.form.status = 'filling';
           })
           .then(() => {
             const eternal = () => {
@@ -162,8 +162,8 @@ export default () => {
                   const { posts } = state;
                   const parsedPosts = parsingData(response);
                   const updatedPosts = updateCollection(parsedPosts, posts);
-                  const composedPosts = addMetaData(updatedPosts, watchedState);
-                  watchedState.posts = composedPosts;
+                  const composedPosts = addMetaData(updatedPosts, viewState);
+                  viewState.posts = composedPosts;
                 });
               });
               setTimeout(eternal, interval);
@@ -172,17 +172,17 @@ export default () => {
           })
           .catch((error) => {
             if (error.message === 'parsererror') {
-              watchedState.form.feedback = {
+              viewState.form.feedback = {
                 message: 'networkAlert.invalidRssUrl',
                 statusForm: 'invalid',
               };
             } else {
-              watchedState.form.feedback = {
+              viewState.form.feedback = {
                 message: 'networkAlert.networkError',
                 statusForm: 'invalid',
               };
             }
-            watchedState.form.status = 'failed';
+            viewState.form.status = 'failed';
           });
       });
     });
