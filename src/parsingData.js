@@ -1,9 +1,9 @@
-export default (response) => {
+export default (content) => {
   const parserXML = new DOMParser();
-  const xmlContent = response.data.contents;
-  const responseXML = parserXML.parseFromString(xmlContent, 'text/xml');
+  const { contents } = content.data;
+  const xmlData = parserXML.parseFromString(contents, 'text/xml');
 
-  if (responseXML.querySelector('parsererror')) throw new Error('parsererror');
+  if (xmlData.querySelector('parsererror')) throw new Error('parsererror');
 
   const parsingData = (data) => {
     const title = data.querySelector('title').textContent;
@@ -23,5 +23,5 @@ export default (response) => {
     return result;
   };
 
-  return parsingData(responseXML);
+  return parsingData(xmlData);
 };

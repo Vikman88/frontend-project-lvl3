@@ -9,55 +9,19 @@ import parsingData from './parsingData.js';
 
 const interval = 5000;
 
-const touchElement = (view, currentId) => {
-  const { posts } = view.uiState;
-  posts.forEach((post) => {
-    const { postId } = post;
-    const item = post;
-    if (postId === currentId) {
-      item.visibility = 'shown';
-    }
-  });
-};
+const addMetaData = (items) => items.forEach((item) => {
+  item.id = _.uniqueId();
+});
 
-const setId = (view) => (el) => {
-  if (!el.id) {
-    const id = _.uniqueId();
-    el.id = id;
-    view.uiState.posts.push({ postId: id, visibility: 'hidden' });
-  }
-  /* if (_.isUndefined(el.touched)) {
-    el.touched = false;
-  } */
-  return el;
-};
-
-const addMetaData = (postsState, view) => {
-  const state = postsState.map((data) => {
-    const newPosts = data.items.map(setId(view));
-    data.items = newPosts;
-    return data;
-  });
-  return state;
-};
-
-const updateCollection = (responseRSS, loadedRSS) => {
-  const mergedPosts = loadedRSS;
-  const loadedlinks = mergedPosts.map(({ link }) => link);
-  if (loadedlinks.includes(responseRSS.link)) {
-    const index = loadedlinks.indexOf(responseRSS.link);
-    const currentLoadedItems = mergedPosts[index].items;
-    /* const currentLoadedLinks = currentLoadedItems.map(({ link }) => link); */
-    const targetItems = responseRSS.items;
-    const newItems = _.differenceBy(targetItems, currentLoadedItems, 'link');
-    /* const newItems = targetItems.reduce((acc, v) => {
-      const currentLink = v.link;
-      if (!currentLoadedLinks.includes(currentLink)) acc.push(v);
-      return acc;
-    }, []); */
-    mergedPosts[index].items.unshift(...newItems);
-  } else mergedPosts.push(responseRSS);
-  return mergedPosts;
+const updateCollection = (loadedRSS, view) => (responseRSS) => {
+  const cloneStatePosts = _.cloneDeep(loadedRSS);
+  const loadedlinks = cloneStatePosts.map(({ link }) => link);
+  const index = loadedlinks.indexOf(responseRSS.link);
+  const currentLoadedItems = cloneStatePosts[index].items;
+  const newItems = _.differenceBy(responseRSS.items, currentLoadedItems, 'link');
+  addMetaData(newItems);
+  cloneStatePosts[index].items.unshift(...newItems);
+  view.posts = cloneStatePosts;
 };
 
 export default () => {
@@ -105,7 +69,7 @@ export default () => {
         urls: [],
         posts: [],
         uiState: {
-          posts: [],
+          posts: new Set(),
           currentId: null,
         },
       };
@@ -116,7 +80,8 @@ export default () => {
         const { target } = value;
         const { id } = target.dataset;
         if (!_.isUndefined(id)) {
-          touchElement(view, id);
+          const { posts } = view.uiState;
+          if (!posts.has(id)) posts.add(id);
           view.uiState.currentId = id;
         }
       });
@@ -142,11 +107,9 @@ export default () => {
         view.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
-            const { posts } = state;
             const parsedPosts = parsingData(response);
-            const updatedPosts = updateCollection(parsedPosts, posts);
-            const composedPosts = addMetaData(updatedPosts, view);
-            view.posts = composedPosts;
+            addMetaData(parsedPosts.items);
+            view.posts.push(parsedPosts);
             view.urls.push(responseUrl);
             view.form.feedback = {
               message: 'networkAlert.success',
@@ -155,20 +118,18 @@ export default () => {
             view.form.status = 'filling';
           })
           .then(() => {
+            const { urls } = state;
             const eternal = () => {
-              const { urls } = state;
-              urls.forEach((url) => {
-                fetchData(url).then((response) => {
-                  const { posts } = state;
-                  const parsedPosts = parsingData(response);
-                  const updatedPosts = updateCollection(parsedPosts, posts);
-                  const composedPosts = addMetaData(updatedPosts, view);
-                  view.posts = composedPosts;
-                });
+              const promises = urls.map(fetchData);
+              const promise = Promise.all(promises);
+              promise.then((response) => {
+                const { posts } = state;
+                const parsedPosts = response.map(parsingData);
+                parsedPosts.forEach(updateCollection(posts, view));
               });
-              setTimeout(eternal, interval);
+              setTimeout(eternal, interval * urls.length);
             };
-            setTimeout(eternal, interval);
+            setTimeout(eternal, interval * urls.length);
           })
           .catch((error) => {
             if (error.message === 'parsererror') {

@@ -8,11 +8,8 @@ const contentPaths = {
 
 const createEl = (el) => document.createElement(`${el}`);
 
-const findEl = (postsState, currentId) => {
-  const result = postsState.flatMap((el) => el.items)
-    .find((item) => item.id === currentId);
-  return result;
-};
+const findEl = (postsState, currentId) => postsState.flatMap((el) => el.items)
+  .find((item) => item.id === currentId);
 
 const buildModalWindow = (state, el) => {
   const { currentId } = state.uiState;
@@ -27,7 +24,6 @@ const buildModalWindow = (state, el) => {
 };
 
 const createFields = (posts, uiState, i18n) => posts.reduce((acc, item) => {
-  const currentUIStateEl = uiState.posts.find((el) => el.postId === item.id);
   const liItem = createEl('li');
   const button = createEl('button');
   button.type = 'button';
@@ -44,7 +40,7 @@ const createFields = (posts, uiState, i18n) => posts.reduce((acc, item) => {
   );
   const aEl = createEl('a');
   aEl.href = item.link;
-  if (currentUIStateEl.visibility === 'shown') aEl.classList.add('font-weight-normal');
+  if (uiState.posts.has(item.id)) aEl.classList.add('font-weight-normal');
   else aEl.classList.add('fw-bold');
   aEl.target = '_blank';
   aEl.rel = 'noopener noreferrer';
