@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-const validate = (url, listUrls) => {
+export default (url, listUrls) => {
   const shema = yup.string()
     .trim()
     .required()
@@ -14,4 +14,3 @@ const validate = (url, listUrls) => {
     return error.message.key;
   }
 };
-export default validate;
