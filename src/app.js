@@ -107,7 +107,8 @@ export default () => {
         view.form.status = 'sending';
         fetchData(responseUrl)
           .then((response) => {
-            const parsedPosts = parsingData(response);
+            const { contents } = response.data;
+            const parsedPosts = parsingData(contents);
             addMetaData(parsedPosts.items);
             view.posts.push(parsedPosts);
             view.urls.push(responseUrl);
