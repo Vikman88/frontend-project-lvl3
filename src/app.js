@@ -26,7 +26,7 @@ const updateCollection = (loadedRSS, view) => (responseRSS) => {
 
 export default () => {
   const i18n = i18next.createInstance();
-  i18n
+  return i18n
     .init({
       lng: 'ru',
       debug: false,
@@ -35,13 +35,13 @@ export default () => {
     .then(() => {
       yup.setLocale({
         mixed: {
-          required: () => ({ key: 'form.messageAlert.empty' }),
-          notOneOf: () => ({ key: 'form.messageAlert.dublicate' }),
+          required: 'form.messageAlert.empty',
+          notOneOf: 'form.messageAlert.dublicate',
         },
 
         string: {
-          max: ({ max }) => ({ key: 'form.messageAlert.big', values: { max } }),
-          url: () => ({ key: 'form.messageAlert.invalid' }),
+          max: 'form.messageAlert.big',
+          url: 'form.messageAlert.invalid',
         },
       });
     })
@@ -125,15 +125,14 @@ export default () => {
               const promise = Promise.all(promises);
               promise.then((response) => {
                 const { posts } = state;
-                const parsedPosts = response.map(parsingData);
+                const parsedPosts = response.map((item) => item.data.contents).map(parsingData);
                 parsedPosts.forEach(updateCollection(posts, view));
-              });
-              setTimeout(eternal, interval * urls.length);
+              }).then(() => setTimeout(eternal, interval));
             };
-            setTimeout(eternal, interval * urls.length);
+            setTimeout(eternal, interval);
           })
           .catch((error) => {
-            if (error.message === 'parsererror') {
+            if (error.response) {
               view.form.feedback = {
                 message: 'networkAlert.invalidRssUrl',
                 statusForm: 'invalid',

@@ -2,7 +2,11 @@ export default (content) => {
   const parserXML = new DOMParser();
   const xmlData = parserXML.parseFromString(content, 'text/xml');
 
-  if (xmlData.querySelector('parsererror')) throw new Error('parsererror');
+  if (xmlData.querySelector('parsererror')) {
+    const error = new Error();
+    error.response = 'parsererror';
+    throw error;
+  }
 
   const parsingData = (data) => {
     const title = data.querySelector('title').textContent;

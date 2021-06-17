@@ -11,7 +11,9 @@ const makeProxyUrl = (source) => {
 
 const fetchData = (source) => {
   const proxyURL = makeProxyUrl(source);
-  return axios.get(proxyURL);
+  return axios.get(proxyURL).catch((error) => {
+    throw error;
+  });
 };
 
 export default fetchData;

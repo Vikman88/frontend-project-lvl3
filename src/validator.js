@@ -11,6 +11,6 @@ export default (url, listUrls) => {
     shema.validateSync(url);
     return null;
   } catch (error) {
-    return error.message.key;
+    return error.message;
   }
 };
